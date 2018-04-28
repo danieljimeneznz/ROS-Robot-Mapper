@@ -98,8 +98,8 @@ include_directories(
 
 #add_library(freeSpace src/freeSpace.cpp)
 
-add_executable( pioneer_laser_node src/pioneerLaser.cpp)
-#target_link_libraries(pioneer_laser_node ${catkin_LIBRARIES} freeSpace) 
+add_executable(pioneer_laser_node src/pioneerLaser.cpp)
+target_link_libraries(pioneer_laser_node ${catkin_LIBRARIES}) 
 add_dependencies(pioneer_laser_node ${catkin_EXPORTED_TARGETS})
 
 ## Declare a cpp library
