@@ -53,3 +53,4 @@ fabric.properties
 build/
 devel/
 .idea/
+src/CMakeLists.txt
