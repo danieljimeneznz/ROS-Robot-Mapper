@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <ros/console.h>
-#include "geometry_msgs/Twist.h"
-#include "sensor_msgs/LaserScan.h"
+#include <geometry_msgs/Twist.h>
+#include <sensor_msgs/LaserScan.h>
 
 geometry_msgs::Twist velocityCommand; 
 
@@ -19,9 +19,10 @@ void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserScanData) {
   //move forward
   velocityCommand.linear.x = 0.1;
   velocityCommand.angular.z = 0.0;
-  
+
   // Go through laser data.
   for(int j = 0; j < rangeDataNum; j++) {
+    ROS_DEBUG("Angle %.4f", (laserScanData->angle_increment * j));
     // If there is an object within 0.5m
     if( laserScanData->ranges[j] < 0.5 ) {
       velocityCommand.linear.x = 0;   // stop forward movement
