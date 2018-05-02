@@ -1,0 +1,3 @@
+[submodule "src/openslam_gmapping"]
+	path = src/openslam_gmapping
+	url = https://github.com/ros-perception/openslam_gmapping
