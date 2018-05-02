@@ -1,3 +1,12 @@
 [submodule "src/openslam_gmapping"]
 	path = src/openslam_gmapping
 	url = https://github.com/ros-perception/openslam_gmapping
+[submodule "src/slam_gmapping"]
+	path = src/slam_gmapping
+	url = https://github.com/ros-perception/slam_gmapping
+[submodule "src/rosaria"]
+	path = src/rosaria
+	url = https://github.com/amor-ros-pkg/rosaria
+[submodule "src/random_numbers"]
+	path = src/random_numbers
+	url = https://github.com/ros-planning/random_numbers
