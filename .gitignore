@@ -54,3 +54,5 @@ build/
 devel/
 .idea/
 src/CMakeLists.txt
+*.m~
+*.asv
