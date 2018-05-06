@@ -15,16 +15,17 @@ public:
 
         // Subscribe to the scan, line and contour topics.
         scan_sub = handle.subscribe("/scan", 1, &LineDetector::laserScanCallback, this);
-//        lines_sub = handle.subscribe("/hough_lines/lines", 1, &LineDetector::houghLinesCallback, this);
+        lines_sub = handle.subscribe("/hough_lines/lines", 1, &LineDetector::houghLinesCallback, this);
         contour_sub = handle.subscribe("/find_contours/contours", 1, &LineDetector::houghContourCallback, this);
     }
 
-    void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr& laserScanData) {
+    void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr &laserScanData) {
         // Convert the laser scan data into a two dimensional binary array representing the objects that have been detected.
 
 
         // Max angle and min angle of the laser scanner divide by the increment angle of each data point.
-        int rangeDataNum = 1 + int((laserScanData->angle_max - laserScanData->angle_min)  / (laserScanData->angle_increment));
+        int rangeDataNum =
+                1 + int((laserScanData->angle_max - laserScanData->angle_min) / (laserScanData->angle_increment));
 
         int x = 0;
         int y = 0;
@@ -36,7 +37,7 @@ public:
         uint8_t img[height * width];
         memset(img, 0, sizeof(img));
         // Loop through laser data and store the x and y co-ordinates in an array.
-        for(int j = 0; j < rangeDataNum; j++) {
+        for (int j = 0; j < rangeDataNum; j++) {
             // Only take laser information that is less than 5m from us.
             if (laserScanData->ranges[j] < 5) {
                 // Uses x = r * cos(theta) + 6 (to center the x axis) * multiplier
@@ -48,6 +49,14 @@ public:
 
                 ROS_DEBUG("Inserting point at %d", width * y + x);
                 img[width * y + x] = 255;
+
+                // Colour in the points around the current point to improve detection.
+                if ((y > 1 && x > 1) && (x < width && y < height)) {
+                    img[width * y + x - 1] = 255;
+                    img[width * y + x + 1] = 255;
+                    img[width * (y + 1) + x] = 255;
+                    img[width * (y - 1) + x] = 255;
+                }
             }
         }
 
@@ -61,7 +70,7 @@ public:
         // Step is the full row length in bytes i.e. columns * number of channels * sizeof(datatype_used).
         image.step = width * sizeof(uint8_t);
         // Push the image array to the message.
-        for(int i = 0; i < (width * height); i++) {
+        for (int i = 0; i < (width * height); i++) {
             image.data.push_back(img[i]);
         }
 
@@ -69,11 +78,48 @@ public:
         image_pub.publish(image);
     }
 
-//    void houghLinesCallback(const opencv_apps::LineArrayStampedConstPtr& lineData) {
-//        ROS_DEBUG("Line Found from: %.4f to: %.4f", lineData->lines[0].pt1, lineData->lines[0].pt2);
-//    }
+    void houghLinesCallback(const opencv_apps::LineArrayStampedConstPtr &lineData) {
+        // Lines that are next to each other need to be collated to find at least two sides of the object.
+        std::vector<opencv_apps::Line> lines;
 
-    void houghContourCallback(const opencv_apps::ContourArrayStampedConstPtr& contourData) {
+        double delta11Diff;
+        double delta12Diff;
+        double delta21Diff;
+        double delta22Diff;
+        double upperThreshold = 2.01;
+        double lowerThreshold = 0.99;
+
+        for (int i = 0; i < lineData->lines.size(); i++) {
+            opencv_apps::Line line = lineData->lines[i];
+            for (int j = 0; j < lines.size(); j++) {
+                // The delta difference is currentLine_x/lines_x + currentLine_y/lines_y
+                // The closer this value is to 2, the closer these two points are to being equal to each other.
+                delta11Diff = line.pt1.x / lines[j].pt1.x + line.pt1.y / lines[j].pt1.y;
+                delta12Diff = line.pt1.x / lines[j].pt2.x + line.pt1.y / lines[j].pt2.y;
+                delta21Diff = line.pt2.x / lines[j].pt1.x + line.pt2.y / lines[j].pt1.y;
+                delta22Diff = line.pt2.x / lines[j].pt2.x + line.pt2.y / lines[j].pt2.y;
+
+                if (!((delta11Diff < upperThreshold && delta11Diff > lowerThreshold) ||
+                      (delta12Diff < upperThreshold && delta12Diff > lowerThreshold) ||
+                      (delta21Diff < upperThreshold && delta21Diff > lowerThreshold) ||
+                      (delta22Diff < upperThreshold && delta22Diff > lowerThreshold))) {
+                    // We have a new line that is different from the current one.
+                    lines.push_back(line);
+                    ROS_INFO("Lines found at x1,y1: %.4f,%.4f x2,y2: %.4f,%.4f", line.pt1.x, line.pt1.y, line.pt2.x,
+                             line.pt2.y);
+                    continue;
+                }
+            }
+            if (lines.size() == 0) {
+                lines.push_back(line);
+                ROS_INFO("Lines found at x1,y1: %.4f,%.4f x2,y2: %.4f,%.4f", line.pt1.x, line.pt1.y, line.pt2.x,
+                         line.pt2.y);
+
+            }
+        }
+    }
+
+    void houghContourCallback(const opencv_apps::ContourArrayStampedConstPtr &contourData) {
 
     }
 
@@ -82,7 +128,7 @@ private:
 
     ros::Publisher image_pub;
     ros::Subscriber scan_sub;
-//    ros::Subscriber lines_sub;
+    ros::Subscriber lines_sub;
     ros::Subscriber contour_sub;
 };
 

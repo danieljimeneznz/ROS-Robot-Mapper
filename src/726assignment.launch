@@ -10,13 +10,13 @@
     </node>
 
     <node pkg="opencv_apps" type="hough_lines" name="hough_lines">
-        <!--<param name="hough_type" value="0" />-->
+        <param name="hough_type" value="1" />
         <param name="debug_view" value="true" />
-        <param name="threshold" value="50" />
-        <param name="rho" value="2.0" />
-        <param name="theta" value="10.0" />
-        <!--<param name="minLineLength" value="20" />-->
-        <!--<param name="maxLineGap" value="30" />-->
+        <param name="threshold" value="25" />
+        <param name="rho" value="5.0" />
+        <param name="theta" value="0.05" />
+        <param name="minLineLength" value="10" />
+        <param name="maxLineGap" value="30" />
     </node>
 
     <!--<node pkg="opencv_apps" type="hough_circles" name="hough_circles">-->
