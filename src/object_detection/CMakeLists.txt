@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(line_detector)
+project(object_detection)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,6 +8,7 @@ project(line_detector)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  opencv_apps
   roscpp
   std_msgs
 )
@@ -103,8 +104,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES line_detector
-#  CATKIN_DEPENDS roscpp std_msgs
+#  LIBRARIES object_detection
+#  CATKIN_DEPENDS opencv_apps roscpp std_msgs
 #  DEPENDS system_lib
 )
 
@@ -119,9 +120,13 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+add_executable(line_detector src/line_detector.cpp)
+target_link_libraries(line_detector ${catkin_LIBRARIES})
+add_dependencies(line_detector ${catkin_EXPORTED_TARGETS})
+
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/line_detector.cpp
+#   src/${PROJECT_NAME}/object_detection.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -132,7 +137,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/line_detector_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/object_detection_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -189,7 +194,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_line_detector.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_object_detection.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

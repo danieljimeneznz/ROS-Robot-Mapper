@@ -13,3 +13,9 @@
 [submodule "src/rosaria"]
 	path = src/rosaria
 	url = https://github.com/amor-ros-pkg/rosaria
+[submodule "src/opencv_apps"]
+	path = src/opencv_apps
+	url = https://github.com/ros-perception/opencv_apps
+[submodule "src/image_pipeline"]
+	path = src/image_pipeline
+	url = https://github.com/ros-perception/image_pipeline
