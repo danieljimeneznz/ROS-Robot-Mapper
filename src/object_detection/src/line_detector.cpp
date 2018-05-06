@@ -82,35 +82,31 @@ public:
         // Lines that are next to each other need to be collated to find at least two sides of the object.
         std::vector<opencv_apps::Line> lines;
 
-        double delta11Diff;
-        double delta12Diff;
-        double delta21Diff;
-        double delta22Diff;
-        double upperThreshold = 2.01;
-        double lowerThreshold = 0.99;
+        int d1x12x1Diff;
+        int d1y12y1Diff;
+        int d1x22x2Diff;
+        int d1y22y2Diff;
+        int thres = 10;
 
         for (int i = 0; i < lineData->lines.size(); i++) {
+            bool different = true;
             opencv_apps::Line line = lineData->lines[i];
             for (int j = 0; j < lines.size(); j++) {
                 // The delta difference is currentLine_x/lines_x + currentLine_y/lines_y
                 // The closer this value is to 2, the closer these two points are to being equal to each other.
-                delta11Diff = line.pt1.x / lines[j].pt1.x + line.pt1.y / lines[j].pt1.y;
-                delta12Diff = line.pt1.x / lines[j].pt2.x + line.pt1.y / lines[j].pt2.y;
-                delta21Diff = line.pt2.x / lines[j].pt1.x + line.pt2.y / lines[j].pt1.y;
-                delta22Diff = line.pt2.x / lines[j].pt2.x + line.pt2.y / lines[j].pt2.y;
+                d1x12x1Diff = abs(int(line.pt1.x - lines[j].pt1.x));
+                d1y12y1Diff = abs(int(line.pt1.y - lines[j].pt1.y));
+                d1x22x2Diff = abs(int(line.pt2.x - lines[j].pt2.x));
+                d1y22y2Diff = abs(int(line.pt2.y - lines[j].pt2.y));
 
-                if (!((delta11Diff < upperThreshold && delta11Diff > lowerThreshold) ||
-                      (delta12Diff < upperThreshold && delta12Diff > lowerThreshold) ||
-                      (delta21Diff < upperThreshold && delta21Diff > lowerThreshold) ||
-                      (delta22Diff < upperThreshold && delta22Diff > lowerThreshold))) {
-                    // We have a new line that is different from the current one.
-                    lines.push_back(line);
-                    ROS_INFO("Lines found at x1,y1: %.4f,%.4f x2,y2: %.4f,%.4f", line.pt1.x, line.pt1.y, line.pt2.x,
-                             line.pt2.y);
-                    continue;
+                ROS_INFO("%d %d %d %d", d1x12x1Diff, d1y12y1Diff, d1x22x2Diff, d1y22y2Diff);
+
+                if (d1x12x1Diff < thres && d1y12y1Diff < thres && d1x22x2Diff < thres && d1y22y2Diff < thres) {
+                    // We have a new line that is the same as the current one.
+                    different = false;
                 }
             }
-            if (lines.size() == 0) {
+            if (different) {
                 lines.push_back(line);
                 ROS_INFO("Lines found at x1,y1: %.4f,%.4f x2,y2: %.4f,%.4f", line.pt1.x, line.pt1.y, line.pt2.x,
                          line.pt2.y);
