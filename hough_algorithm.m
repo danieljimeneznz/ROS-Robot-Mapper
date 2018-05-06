@@ -1,5 +1,5 @@
 scan = csvread('box.csv');
-scan = csvread('circle.csv');
+% scan = csvread('circle.csv');
 
 % Delta Phi is the angle between each of the readings (convert to rad as
 % matlab uses rad).
