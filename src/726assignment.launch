@@ -1,0 +1,40 @@
+<launch>
+    <param name="use_sim_time " value="true" />
+
+    <!--<node pkg="robot_driver" type="pioneer_laser_node" name="pioneer_laser_node" output="screen">-->
+        <!--<remap from="RosAria/cmd_vel" to="cmd_vel"/>-->
+    <!--</node>-->
+
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/task1.world">
+        <remap from="base_scan" to="scan" />
+    </node>
+
+    <node pkg="opencv_apps" type="hough_lines" name="hough_lines">
+        <!--<param name="hough_type" value="0" />-->
+        <param name="debug_view" value="true" />
+        <param name="threshold" value="50" />
+        <param name="rho" value="2.0" />
+        <param name="theta" value="10.0" />
+        <!--<param name="minLineLength" value="20" />-->
+        <!--<param name="maxLineGap" value="30" />-->
+    </node>
+
+    <!--<node pkg="opencv_apps" type="hough_circles" name="hough_circles">-->
+        <!--<param name="debug_view" value="true" />-->
+    <!--</node>-->
+
+    <!--<node pkg="opencv_apps" type="find_contours" name="find_contours">-->
+        <!--<param name="debug_view" value="true" />-->
+        <!--<param name="canny_low_threshold" value="40" />-->
+    <!--</node>-->
+
+    <!--<node pkg="opencv_apps" type="general_contours" name="general_contours">-->
+        <!--<param name="debug_view" value="true" />-->
+    <!--</node>-->
+
+    <node pkg="object_detection" type="line_detector" name="line_detector" output="screen">
+    </node>
+
+    <node pkg="rqt_console" type="rqt_console" name="rqt_console">
+    </node>
+</launch>

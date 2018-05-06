@@ -1,5 +1,6 @@
 # milliseconds per update step
 interval_sim 50
+resolution 0.001
 
 window
 (
