@@ -124,6 +124,10 @@ add_executable(line_detector src/line_detector.cpp)
 target_link_libraries(line_detector ${catkin_LIBRARIES})
 add_dependencies(line_detector ${catkin_EXPORTED_TARGETS})
 
+add_executable(detect_objects src/line_detector.cpp)
+target_link_libraries(detect_objects ${catkin_LIBRARIES})
+add_dependencies(detect_objects ${catkin_EXPORTED_TARGETS})
+
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/object_detection.cpp

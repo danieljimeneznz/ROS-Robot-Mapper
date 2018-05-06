@@ -5,18 +5,18 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/LaserScan.h>
 #include <opencv_apps/LineArrayStamped.h>
-#include <opencv_apps/ContourArrayStamped.h>
+#include <opencv_apps/CircleArrayStamped.h>
 
 class LineDetector {
 public:
     LineDetector() {
-        // Publish the scan information to the image topic.
+        // Publish the scan information and  condensed lines to the image topic and line topic.
         image_pub = handle.advertise<sensor_msgs::Image>("/image", 1);
+        lines_pub = handle.advertise<opencv_apps::LineArrayStamped>("/object_detection/lines", 1);
 
-        // Subscribe to the scan, line and contour topics.
+        // Subscribe to the scan and line topics.
         scan_sub = handle.subscribe("/scan", 1, &LineDetector::laserScanCallback, this);
         lines_sub = handle.subscribe("/hough_lines/lines", 1, &LineDetector::houghLinesCallback, this);
-        contour_sub = handle.subscribe("/find_contours/contours", 1, &LineDetector::houghContourCallback, this);
     }
 
     void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr &laserScanData) {
@@ -81,6 +81,7 @@ public:
     void houghLinesCallback(const opencv_apps::LineArrayStampedConstPtr &lineData) {
         // Lines that are next to each other need to be collated to find at least two sides of the object.
         std::vector<opencv_apps::Line> lines;
+        opencv_apps::LineArrayStamped linesMsg;
 
         int d1x12x1Diff;
         int d1y12y1Diff;
@@ -99,7 +100,7 @@ public:
                 d1x22x2Diff = abs(int(line.pt2.x - lines[j].pt2.x));
                 d1y22y2Diff = abs(int(line.pt2.y - lines[j].pt2.y));
 
-                ROS_INFO("%d %d %d %d", d1x12x1Diff, d1y12y1Diff, d1x22x2Diff, d1y22y2Diff);
+                ROS_DEBUG("%d %d %d %d", d1x12x1Diff, d1y12y1Diff, d1x22x2Diff, d1y22y2Diff);
 
                 if (d1x12x1Diff < thres && d1y12y1Diff < thres && d1x22x2Diff < thres && d1y22y2Diff < thres) {
                     // We have a new line that is the same as the current one.
@@ -108,24 +109,22 @@ public:
             }
             if (different) {
                 lines.push_back(line);
-                ROS_INFO("Lines found at x1,y1: %.4f,%.4f x2,y2: %.4f,%.4f", line.pt1.x, line.pt1.y, line.pt2.x,
-                         line.pt2.y);
-
+                linesMsg.lines.push_back(line);
+                ROS_DEBUG("Line found x1,y1: %.4f,%.4f x2,y2: %.4f,%.4f", line.pt1.x, line.pt1.y, line.pt2.x,
+                          line.pt2.y);
             }
         }
-    }
 
-    void houghContourCallback(const opencv_apps::ContourArrayStampedConstPtr &contourData) {
-
+        lines_pub.publish(linesMsg);
     }
 
 private:
     ros::NodeHandle handle;
 
     ros::Publisher image_pub;
+    ros::Publisher lines_pub;
     ros::Subscriber scan_sub;
     ros::Subscriber lines_sub;
-    ros::Subscriber contour_sub;
 };
 
 int main(int argc, char **argv) {
