@@ -9,6 +9,10 @@
 
 class LineDetector {
 public:
+
+    /**
+     * Create a new LineDetector instance.
+     */
     LineDetector() {
         // Publish the scan information and  condensed lines to the image topic and line topic.
         image_pub = handle.advertise<sensor_msgs::Image>("/image", 1);
@@ -17,19 +21,22 @@ public:
         // Subscribe to the scan and line topics.
         scan_sub = handle.subscribe("/scan", 1, &LineDetector::laserScanCallback, this);
         lines_sub = handle.subscribe("/hough_lines/lines", 1, &LineDetector::houghLinesCallback, this);
+        multiplier = 100;
     }
 
+    /**
+     * Laser scan callback converts laser data into an image representing that objects that have been seen. This is
+     * then fed to the /image topic for the hough_lines/hough_circles algorithm to find the lines/circles.
+     *
+     * @param laserScanData     The scan data.
+     */
     void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr &laserScanData) {
-        // Convert the laser scan data into a two dimensional binary array representing the objects that have been detected.
-
-
         // Max angle and min angle of the laser scanner divide by the increment angle of each data point.
         int rangeDataNum =
                 1 + int((laserScanData->angle_max - laserScanData->angle_min) / (laserScanData->angle_increment));
 
         int x = 0;
         int y = 0;
-        unsigned int multiplier = 100;
         unsigned int width = 12 * multiplier;
         unsigned int height = 6 * multiplier;
 
@@ -78,6 +85,12 @@ public:
         image_pub.publish(image);
     }
 
+    /**
+     * Cleans up the lines by kongregating similar lines/parallel lines into a single line segment. These are then
+     * fed to the /object_detection/lines topic to be handled by the object detector.
+     *
+     * @param lineData      The line data to tidy up.
+     */
     void houghLinesCallback(const opencv_apps::LineArrayStampedConstPtr &lineData) {
         // Lines that are next to each other need to be collated to find at least two sides of the object.
         std::vector<opencv_apps::Line> lines;
@@ -90,7 +103,7 @@ public:
         int thres = 10;
 
         for (int i = 0; i < lineData->lines.size(); i++) {
-            bool different = true;
+            bool bDifferent = true;
             opencv_apps::Line line = lineData->lines[i];
             for (int j = 0; j < lines.size(); j++) {
                 // The delta difference is currentLine_x/lines_x + currentLine_y/lines_y
@@ -104,10 +117,10 @@ public:
 
                 if (d1x12x1Diff < thres && d1y12y1Diff < thres && d1x22x2Diff < thres && d1y22y2Diff < thres) {
                     // We have a new line that is the same as the current one.
-                    different = false;
+                    bDifferent = false;
                 }
             }
-            if (different) {
+            if (bDifferent) {
                 lines.push_back(line);
                 linesMsg.lines.push_back(line);
                 ROS_DEBUG("Line found x1,y1: %.4f,%.4f x2,y2: %.4f,%.4f", line.pt1.x, line.pt1.y, line.pt2.x,
@@ -125,27 +138,15 @@ private:
     ros::Publisher lines_pub;
     ros::Subscriber scan_sub;
     ros::Subscriber lines_sub;
+
+    unsigned int multiplier;
 };
 
 int main(int argc, char **argv) {
     // Command line ROS arguments
     ros::init(argc, argv, "line_detector");
 
-
-    // Loop 10 Hz
-    //ros::Rate loop_rate(10);
-
-    // Publish the image data to the image callback.
-//    while (ros::ok()) {
-//        ros::spinOnce();
-//        loop_rate.sleep();
-//
-//        // Publish the image data.
-//        image_pub.publish(image);
-//    }
-
-    LineDetector LineDetectorObject;
-
+    LineDetector lineDetector;
     ros::spin();
 
     return 0;
