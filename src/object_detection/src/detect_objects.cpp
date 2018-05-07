@@ -10,18 +10,26 @@ public:
     std::string type;
     double x;
     double y;
+
+    virtual double getRadius() {
+        return 0.0;
+    };
 };
 
-class Barrel : Object {
+class Barrel : public Object {
 public:
     Barrel() {
         this->type = "Barrel";
     }
 
     double radius;
+
+    double getRadius() {
+        return this->radius;
+    }
 };
 
-class Container : Object {
+class Container : public Object {
 public:
     Container() {
         this->type = "Container";
@@ -72,7 +80,6 @@ public:
                 int pt21xDiff = abs(int(line1.pt2.x - line2.pt1.x));
                 int pt21yDiff = abs(int(line1.pt2.y - line2.pt1.y));
 
-
                 // See if the x and y co-ordinates of two lines are near each other.
                 if ((pt11xDiff < pointThreshold && pt11yDiff < pointThreshold) ||
                     (pt22xDiff < pointThreshold && pt22yDiff < pointThreshold) ||
@@ -80,7 +87,7 @@ public:
                     (pt21xDiff < pointThreshold && pt12yDiff < pointThreshold)) {
 
                     // The lines are close to each other. Therefore these two lines represent two sides of a container.
-                    Container *container = new Container();
+                    Container* container = new Container();
                     container->width =
                             sqrt(pow(line1.pt2.x - line1.pt1.x, 2) + pow(line1.pt2.y - line1.pt2.y, 2)) / multiplier;
                     container->height =
@@ -94,15 +101,19 @@ public:
     }
 
     void circlesCallback(const opencv_apps::CircleArrayStampedConstPtr &circleData) {
-        // Get the centre co-ordinate referenced to the global frame.
-//        for (int i = 0; i < circleData->circles.size())
-        // TODO: Figure this out.
+        for (int i = 0; i < circleData->circles.size(); i++) {
+            Barrel* barrel = new Barrel();
+            barrel->x = circleData->circles[i].center.x/multiplier - 6;
+            barrel->y = circleData->circles[i].center.y/multiplier;
+            barrel->radius = circleData->circles[i].radius/multiplier;
 
-        // add object to bin.
-        // barrel = centre, radius.
+            // Get the centre co-ordinate referenced to the global frame.
+            referencePointsToGlobalFrame(&barrel->x, &barrel->y);
+            addObjectToBin(barrel);
+        }
     }
 
-    void referencePointsToGlobalFrame(double &x, double &y) {
+    void referencePointsToGlobalFrame(double* x, double* y) {
     }
 
     /**
@@ -111,15 +122,15 @@ public:
      *
      * @param object    The object to insert into the object bin.
      */
-    void addObjectToBin(const Object &object) {
+    void addObjectToBin(Object* object) {
         bool bInBin = false;
         unsigned int counterIndex = 0;
         // Place in the bin if not already in there.
         for (unsigned int i = 0; i < objectBin.size(); i++) {
-            Object obj = objectBin[i];
+            Object* obj = objectBin[i];
 
-            if (fabs(object.x - obj.x) < binThreshold && fabs(object.y - obj.y) < binThreshold &&
-                obj.type != object.type) {
+            if (fabs(object->x - obj->x) < binThreshold && fabs(object->y - obj->y) < binThreshold &&
+                obj->type != object->type) {
                 bInBin = true;
                 counterIndex = i;
                 break;
@@ -128,17 +139,22 @@ public:
 
         // Add object to bin if it was not found.
         if (!bInBin) {
+            if (object->type == "Barrel") {
+                ROS_DEBUG("Added object: %s to bin. (x, y, r): (%.4f, %.4f, %.4f)", object->type.c_str(), object->x, object->y, object->getRadius());
+            }
             objectBin.push_back(object);
             objectBinCount.push_back(1);
         } else {
             // Increment bin counter.
             objectBinCount[counterIndex]++;
+            // delete the object to free memory.
+            delete object;
         }
     }
 
     void findObjects() {
         // Consolidate objects from the bin.
-        // Add the found object to the object map if it does not already exist.
+        // Add the found object to the object map if it does not already exist and count is above threshold.
         // Display found object to console.
     }
 
@@ -151,11 +167,11 @@ private:
     double multiplier;
 
     // x and y coordinates relative to the global reference frame.
-    // Objects stored as map i.e. { Id: Object }
-    std::map<int, Object> objects;
+    // Objects stored as map i.e. { Id: *Object }
+    std::map<int, Object*> objects;
 
     // Object Bin represents all the possible objects that could exist in the world at that point (box or circle).
-    std::vector<Object> objectBin;
+    std::vector<Object*> objectBin;
     double binThreshold;
     // Object Bin count is a counter that counts how many possible times the object has been detected as a box or circle.
     std::vector<unsigned int> objectBinCount;
@@ -171,11 +187,11 @@ int main(int argc, char **argv) {
     // Command line ROS arguments
     ros::init(argc, argv, "detect_objects");
 
+    ObjectDetector objectDetector;
 
     // Loop 10 Hz
     ros::Rate loop_rate(10);
 
-    ObjectDetector objectDetector;
 
     while (ros::ok()) {
         ros::spinOnce();
