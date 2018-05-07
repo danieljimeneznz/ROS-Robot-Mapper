@@ -5,14 +5,14 @@
         <!--<remap from="RosAria/cmd_vel" to="cmd_vel"/>-->
     <!--</node>-->
 
-    <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/task1.world">-->
-    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/generated.world">
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/task1.world">
+    <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/generated.world">-->
         <remap from="base_scan" to="scan" />
     </node>
 
     <node pkg="opencv_apps" type="hough_lines" name="hough_lines">
         <param name="hough_type" value="1" />
-        <!--<param name="debug_view" value="true" />-->
+        <param name="debug_view" value="true" />
         <param name="threshold" value="25" />
         <param name="rho" value="5.0" />
         <param name="theta" value="0.05" />
@@ -22,7 +22,7 @@
 
     <node pkg="opencv_apps" type="hough_circles" name="hough_circles">
         <param name="canny_threshold" value="200" />
-        <!--<param name="debug_view" value="true" />-->
+        <param name="debug_view" value="true" />
         <param name="accumulator_threshold" value="110" />
         <param name="gaussian_blur_size" value="5" />
         <param name="gaussian_sigma_x" value="4.0" />
@@ -31,15 +31,6 @@
         <param name="min_circle_radius" value="10" />
         <param name="max_circle_radius" value="50" />
     </node>
-
-    <!--<node pkg="opencv_apps" type="find_contours" name="find_contours">-->
-        <!--<param name="debug_view" value="true" />-->
-        <!--<param name="canny_low_threshold" value="40" />-->
-    <!--</node>-->
-
-    <!--<node pkg="opencv_apps" type="general_contours" name="general_contours">-->
-        <!--<param name="debug_view" value="true" />-->
-    <!--</node>-->
 
     <node pkg="object_detection" type="line_detector" name="line_detector" output="screen">
     </node>
