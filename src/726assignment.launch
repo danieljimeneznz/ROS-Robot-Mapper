@@ -21,13 +21,13 @@
     </node>
 
     <node pkg="opencv_apps" type="hough_circles" name="hough_circles">
-        <param name="canny_threshold" value="200" />
+        <param name="canny_threshold" value="100" />
         <param name="debug_view" value="true" />
-        <param name="accumulator_threshold" value="110" />
-        <param name="gaussian_blur_size" value="5" />
+        <param name="accumulator_threshold" value="54" />
+        <param name="gaussian_blur_size" value="17" />
         <param name="gaussian_sigma_x" value="4.0" />
         <param name="gaussian_sigma_y" value="4.0" />
-        <param name="dp" value="8" />
+        <param name="dp" value="7" />
         <param name="min_circle_radius" value="10" />
         <param name="max_circle_radius" value="50" />
     </node>
@@ -35,8 +35,8 @@
     <node pkg="object_detection" type="line_detector" name="line_detector" output="screen">
     </node>
 
-    <node pkg="object_detection" type="detect_objects" name="detect_objects" output="screen">
-    </node>
+    <!--<node pkg="object_detection" type="detect_objects" name="detect_objects" output="screen">-->
+    <!--</node>-->
 
     <node pkg="rqt_console" type="rqt_console" name="rqt_console">
     </node>

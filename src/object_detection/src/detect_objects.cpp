@@ -152,7 +152,11 @@ public:
                 if (bLinesClose) {
                     // The lines are close to each other. Therefore these two lines represent two sides of a container.
                     container->x = (a + (a - e) / 2 + (c - a) / 2) / multiplier - 6;
+//                    container->x = (a + e + c) / multiplier - 6;
+
                     container->y = (b + (b - f) / 2 + (d - b) / 2) / multiplier;
+//                    container->y = (b + f - b) / multiplier;
+
 
                     container->width =
                             sqrt(pow(line1.pt2.x - line1.pt1.x, 2) + pow(line1.pt2.y - line1.pt2.y, 2)) / multiplier;
@@ -196,7 +200,7 @@ public:
             Object *obj = objectBin[i];
 
             if (fabs(object->x - obj->x) < binThreshold && fabs(object->y - obj->y) < binThreshold &&
-                obj->type != object->type) {
+                obj->type == object->type) {
                 bInBin = true;
                 counterIndex = i;
                 break;
