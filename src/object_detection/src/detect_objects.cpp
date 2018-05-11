@@ -120,34 +120,35 @@ public:
                     e = line2.pt2.x;
                     f = line2.pt2.y;
                     bLinesClose = true;
-                } else if (pt22xDiff < pointThreshold && pt22yDiff < pointThreshold) {
-                    // Intercept at line1.pt2 && line2.pt2
-                    a = line1.pt2.x;
-                    b = line1.pt2.y;
-                    c = line1.pt1.x;
-                    d = line1.pt1.y;
-                    e = line2.pt1.x;
-                    f = line2.pt1.y;
-                    bLinesClose = true;
-                } else if (pt12xDiff < pointThreshold && pt12yDiff < pointThreshold) {
-                    // Intercept at line1.pt1 && line2.pt2
-                    a = line1.pt1.x;
-                    b = line1.pt1.y;
-                    c = line1.pt2.x;
-                    d = line1.pt2.y;
-                    e = line2.pt1.x;
-                    f = line2.pt1.y;
-                    bLinesClose = true;
-                } else if (pt21xDiff < pointThreshold && pt12yDiff < pointThreshold) {
-                    // Intercept at line1.pt2 && line2.pt1
-                    a = line1.pt2.x;
-                    b = line1.pt2.y;
-                    c = line1.pt1.x;
-                    d = line1.pt1.y;
-                    e = line2.pt2.x;
-                    f = line2.pt2.y;
-                    bLinesClose = true;
                 }
+//                } else if (pt22xDiff < pointThreshold && pt22yDiff < pointThreshold) {
+//                    // Intercept at line1.pt2 && line2.pt2
+//                    a = line1.pt2.x;
+//                    b = line1.pt2.y;
+//                    c = line1.pt1.x;
+//                    d = line1.pt1.y;
+//                    e = line2.pt1.x;
+//                    f = line2.pt1.y;
+//                    bLinesClose = true;
+//                } else if (pt12xDiff < pointThreshold && pt12yDiff < pointThreshold) {
+//                    // Intercept at line1.pt1 && line2.pt2
+//                    a = line1.pt1.x;
+//                    b = line1.pt1.y;
+//                    c = line1.pt2.x;
+//                    d = line1.pt2.y;
+//                    e = line2.pt1.x;
+//                    f = line2.pt1.y;
+//                    bLinesClose = true;
+//                } else if (pt21xDiff < pointThreshold && pt12yDiff < pointThreshold) {
+//                    // Intercept at line1.pt2 && line2.pt1
+//                    a = line1.pt2.x;
+//                    b = line1.pt2.y;
+//                    c = line1.pt1.x;
+//                    d = line1.pt1.y;
+//                    e = line2.pt2.x;
+//                    f = line2.pt2.y;
+//                    bLinesClose = true;
+//                }
 
                 if (bLinesClose) {
                     // The lines are close to each other. Therefore these two lines represent two sides of a container.
@@ -193,6 +194,12 @@ public:
      * @param object    The object to insert into the object bin.
      */
     void addObjectToBin(Object *object) {
+        // TODO: Remove
+        // For now ignore objects that are further than 2m (this will ignore the walls for part A).
+        if (fabs(object->x) > 2.0 || object->y > 2.0) {
+            return;
+        }
+
         bool bInBin = false;
         unsigned int counterIndex = 0;
         // Place in the bin if not already in there.

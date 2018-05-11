@@ -5,8 +5,12 @@
         <!--<remap from="RosAria/cmd_vel" to="cmd_vel"/>-->
     <!--</node>-->
 
-    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/task1.world">
+    <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/task1.world">-->
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/generated.world">-->
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/barrel_no_border.world">
+    <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/container_no_border.world">-->
+    <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/barrel_border.world">-->
+    <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/container_border.world">-->
         <remap from="base_scan" to="scan" />
     </node>
 
@@ -21,13 +25,13 @@
     </node>
 
     <node pkg="opencv_apps" type="hough_circles" name="hough_circles">
-        <param name="canny_threshold" value="100" />
+        <param name="canny_threshold" value="118" />
         <param name="debug_view" value="true" />
         <param name="accumulator_threshold" value="54" />
-        <param name="gaussian_blur_size" value="17" />
+        <param name="gaussian_blur_size" value="13" />
         <param name="gaussian_sigma_x" value="4.0" />
         <param name="gaussian_sigma_y" value="4.0" />
-        <param name="dp" value="7" />
+        <param name="dp" value="8" />
         <param name="min_circle_radius" value="10" />
         <param name="max_circle_radius" value="50" />
     </node>
@@ -38,6 +42,6 @@
     <!--<node pkg="object_detection" type="detect_objects" name="detect_objects" output="screen">-->
     <!--</node>-->
 
-    <node pkg="rqt_console" type="rqt_console" name="rqt_console">
-    </node>
+    <!--<node pkg="rqt_console" type="rqt_console" name="rqt_console">-->
+    <!--</node>-->
 </launch>
