@@ -51,14 +51,13 @@ public:
                 x = int((laserScanData->ranges[j] * cos(j * laserScanData->angle_increment) + 6) * multiplier);
                 y = int(laserScanData->ranges[j] * sin(j * laserScanData->angle_increment) * multiplier);
 
-                ROS_DEBUG("x co-ordinate found: %d", x);
-                ROS_DEBUG("y co-ordinate found: %d", y);
-
                 ROS_DEBUG("Inserting point at %d", width * y + x);
-                img[width * y + x] = 255;
 
+                // X and Y must be positive and less than the width and height.
                 // Colour in the points around the current point to improve detection.
                 if ((y > 1 && x > 1) && (x < width && y < height)) {
+                    img[width * y + x] = 255;
+
                     img[width * y + x - 1] = 255;
                     img[width * y + x + 1] = 255;
                     img[width * (y + 1) + x] = 255;
@@ -96,6 +95,7 @@ public:
         std::vector<opencv_apps::Line> lines;
         opencv_apps::LineArrayStamped linesMsg;
 
+        // TODO: REWITE METHOD.
         int d1x12x1Diff;
         int d1y12y1Diff;
         int d1x22x2Diff;

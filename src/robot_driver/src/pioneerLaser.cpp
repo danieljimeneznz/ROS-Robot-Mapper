@@ -62,7 +62,7 @@ int main (int argc, char **argv) {
     loop_rate.sleep();
 
     // publish to the twist to the topic
-    vel_pub_object.publish(velocityCommand);
+//    vel_pub_object.publish(velocityCommand);
   }
   
   return 0;
