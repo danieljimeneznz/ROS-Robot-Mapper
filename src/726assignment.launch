@@ -5,13 +5,13 @@
         <!--<remap from="RosAria/cmd_vel" to="cmd_vel"/>-->
     <!--</node>-->
 
-    <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/task1.world">-->
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/task1.world">
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/generated.world">-->
-    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/barrel_no_border.world">
+    <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/barrel_no_border.world">-->
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/container_no_border.world">-->
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/barrel_border.world">-->
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/container_border.world">-->
-        <remap from="base_scan" to="scan" />
+        <remap from="base_scan" to="scanOrig" />
     </node>
 
     <node pkg="opencv_apps" type="hough_lines" name="hough_lines">
@@ -36,12 +36,16 @@
         <param name="max_circle_radius" value="50" />
     </node>
 
-    <node pkg="object_detection" type="line_detector" name="line_detector" output="screen">
-    </node>
+    <!--<node pkg="object_detection" type="line_detector" name="line_detector" output="screen">-->
+    <!--</node>-->
 
     <!--<node pkg="object_detection" type="detect_objects" name="detect_objects" output="screen">-->
     <!--</node>-->
 
     <!--<node pkg="rqt_console" type="rqt_console" name="rqt_console">-->
     <!--</node>-->
+
+    <node pkg="custom_noise" type="custom_noise_node" name="custom_noise_node" output="screen" >
+        <remap from="scan_noise" to="scan"/>
+    </node>
 </launch>
