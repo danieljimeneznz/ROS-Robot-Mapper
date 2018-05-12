@@ -19,7 +19,7 @@ public:
         lines_pub = handle.advertise<opencv_apps::LineArrayStamped>("/object_detection/lines", 1);
 
         // Subscribe to the scan and line topics.
-        scan_sub = handle.subscribe("/scan", 1, &LineDetector::laserScanCallback, this);
+        scan_sub = handle.subscribe("/object_detection/scan", 1, &LineDetector::laserScanCallback, this);
         lines_sub = handle.subscribe("/hough_lines/lines", 1, &LineDetector::houghLinesCallback, this);
         multiplier = 100;
     }

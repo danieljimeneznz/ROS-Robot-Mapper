@@ -128,6 +128,10 @@ add_executable(detect_objects src/detect_objects.cpp)
 target_link_libraries(detect_objects ${catkin_LIBRARIES})
 add_dependencies(detect_objects ${catkin_EXPORTED_TARGETS})
 
+add_executable(clean_scan src/clean_scan.cpp)
+target_link_libraries(clean_scan ${catkin_LIBRARIES})
+add_dependencies(clean_scan ${catkin_EXPORTED_TARGETS})
+
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/object_detection.cpp
