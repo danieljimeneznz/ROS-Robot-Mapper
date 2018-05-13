@@ -5,6 +5,7 @@
 #include <ros/ros.h>
 #include <opencv_apps/LineArrayStamped.h>
 #include <sensor_msgs/Image.h>
+#include <tf/LinearMath/Vector3.h>
 
 class BorderRemover {
 public:
@@ -21,28 +22,36 @@ public:
     void houghLinesCallback(const opencv_apps::LineArrayStampedConstPtr &lineData) {
         // See if two lines meet at a point and are perpendicular to each other.
         for (int i = 0; i < lineData->lines.size(); i++) {
-            double line1[2][2];
-            line1[0][0] = lineData->lines[i].pt1.x;
-            line1[0][1] = lineData->lines[i].pt1.y;
-            line1[1][0] = lineData->lines[i].pt2.x;
-            line1[1][1] = lineData->lines[i].pt2.y;
+            // Convert line points into vector.
+            tf::Vector3 line1[2];
+            line1[0] = tf::Vector3(lineData->lines[i].pt1.x, lineData->lines[i].pt1.y, 0);
+            line1[1] = tf::Vector3(lineData->lines[i].pt2.x, lineData->lines[i].pt2.y, 0);
 
             for (int j = 0; j < lineData->lines.size(); j++) {
-                // Store the points in an array
-                double line2[2][2];
-                line2[0][0] = lineData->lines[j].pt1.x;
-                line2[0][1] = lineData->lines[j].pt1.y;
-                line2[1][0] = lineData->lines[j].pt2.x;
-                line2[1][1] = lineData->lines[j].pt2.y;
+                if(i == j) {
+                    continue;
+                }
 
-                for(int k = 0; k < 2; k++) {
-                    for(int l = 0; l < 2; l++) {
-                        double distance = sqrt(pow(fabs(line1[k][0] - line2[l][0]),2) + pow(fabs(line1[k][1] - line2[l][1]),2));
+                // Convert line points into vector.
+                tf::Vector3 line2[2];
+                line2[0] = tf::Vector3(lineData->lines[j].pt1.x, lineData->lines[j].pt1.y, 0);
+                line2[1] = tf::Vector3(lineData->lines[j].pt2.x, lineData->lines[j].pt2.y, 0);
 
-                        // If distance is less than threshold then the two meet.
-                        if (distance < 5.0) {
-                            // See if they are perpendicular.
-                            ROS_DEBUG("CLOSE but not perpendicular?");
+                // See if they are perpendicular.
+                tf::Vector3 line1pt = line1[0] - line1[1];
+                tf::Vector3 line2pt = line2[0] - line2[1];
+                double cross = fabs(tf::tfDot(line1pt, line2pt));
+
+                // They are both perpendicular
+                if (cross < 5.0) {
+                    for (int k = 0; k < 2; k++) {
+                        for (int l = 0; l < 2; l++) {
+                            double distance = fabs(tf::tfDistance(line1[k], line2[l]));
+                            // If distance is less than threshold then the two meet.
+                            if (distance < 5.0) {
+                                // We have two lines that are perpendicular and close to each other.
+                                ROS_DEBUG("FOUND A BORDER CORNER");
+                            }
                         }
                     }
                 }
