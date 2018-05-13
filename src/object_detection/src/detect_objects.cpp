@@ -68,12 +68,17 @@ class ObjectDetector {
 public:
     ObjectDetector() {
         // Subscribe to the line and circle topics.
-        lines_sub = handle.subscribe("/object_detection/lines", 1, &ObjectDetector::linesCallback, this);
-        circle_sub = handle.subscribe("/hough_circles/circles", 1, &ObjectDetector::circlesCallback, this);
+        border_sub = handle.subscribe("/border", 1, &ObjectDetector::borderCallback, this);
+        lines_sub = handle.subscribe("/lines", 1, &ObjectDetector::linesCallback, this);
+        circle_sub = handle.subscribe("/circles", 1, &ObjectDetector::circlesCallback, this);
 
         multiplier = 100.0;
         binThreshold = 0.1;
         threshold = 1;
+    }
+
+    void borderCallback(const opencv_apps::LineArrayStampedConstPtr &border) {
+
     }
 
     void linesCallback(const opencv_apps::LineArrayStampedConstPtr &lineData) {
@@ -194,12 +199,6 @@ public:
      * @param object    The object to insert into the object bin.
      */
     void addObjectToBin(Object *object) {
-        // TODO: Remove
-        // For now ignore objects that are further than 2m (this will ignore the walls for part A).
-        if (fabs(object->x) > 2.0 || object->y > 2.0) {
-            return;
-        }
-
         bool bInBin = false;
         unsigned int counterIndex = 0;
         // Place in the bin if not already in there.
@@ -279,6 +278,7 @@ public:
 private:
     ros::NodeHandle handle;
 
+    ros::Subscriber border_sub;
     ros::Subscriber lines_sub;
     ros::Subscriber circle_sub;
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(object_detection)
+project(cleanup)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -32,10 +32,10 @@ find_package(catkin REQUIRED COMPONENTS
 ##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).
 ## * In the file package.xml:
 ##   * add a build_depend tag for "message_generation"
-##   * add a build_depend and a run_depend tag for each package in MSG_DEP_SET
+##   * add a build_depend and a exec_depend tag for each package in MSG_DEP_SET
 ##   * If MSG_DEP_SET isn't empty the following dependency has been pulled in
 ##     but can be declared for certainty nonetheless:
-##     * add a run_depend tag for "message_runtime"
+##     * add a exec_depend tag for "message_runtime"
 ## * In this file (CMakeLists.txt):
 ##   * add "message_generation" and every package in MSG_DEP_SET to
 ##     find_package(catkin REQUIRED COMPONENTS ...)
@@ -80,7 +80,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## To declare and build dynamic reconfigure parameters within this
 ## package, follow these steps:
 ## * In the file package.xml:
-##   * add a build_depend and a run_depend tag for "dynamic_reconfigure"
+##   * add a build_depend and a exec_depend tag for "dynamic_reconfigure"
 ## * In this file (CMakeLists.txt):
 ##   * add "dynamic_reconfigure" to
 ##     find_package(catkin REQUIRED COMPONENTS ...)
@@ -104,7 +104,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES object_detection
+#  LIBRARIES cleanup
 #  CATKIN_DEPENDS opencv_apps roscpp std_msgs
 #  DEPENDS system_lib
 )
@@ -120,22 +120,18 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(scan_to_image_converter src/scan_to_image_converter.cpp)
-target_link_libraries(scan_to_image_converter ${catkin_LIBRARIES})
-add_dependencies(scan_to_image_converter ${catkin_EXPORTED_TARGETS})
-
-add_executable(remove_borders src/border_remover.cpp)
-target_link_libraries(remove_borders ${catkin_LIBRARIES})
-add_dependencies(remove_borders ${catkin_EXPORTED_TARGETS})
-
-add_executable(detect_objects src/detect_objects.cpp)
-target_link_libraries(detect_objects ${catkin_LIBRARIES})
-add_dependencies(detect_objects ${catkin_EXPORTED_TARGETS})
-
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/object_detection.cpp
+#   src/${PROJECT_NAME}/cleanup.cpp
 # )
+
+add_executable(scan_cleaner src/scan.cpp)
+target_link_libraries(scan_cleaner ${catkin_LIBRARIES})
+add_dependencies(scan_cleaner ${catkin_EXPORTED_TARGETS})
+
+add_executable(line_cleaner src/lines.cpp)
+target_link_libraries(line_cleaner ${catkin_LIBRARIES})
+add_dependencies(line_cleaner ${catkin_EXPORTED_TARGETS})
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -145,7 +141,7 @@ add_dependencies(detect_objects ${catkin_EXPORTED_TARGETS})
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/object_detection_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/cleanup_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -202,7 +198,7 @@ add_dependencies(detect_objects ${catkin_EXPORTED_TARGETS})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_object_detection.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_cleanup.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

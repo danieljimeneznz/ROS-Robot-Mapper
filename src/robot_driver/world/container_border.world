@@ -66,5 +66,15 @@ border( pose [ -2.500 0.000 0.000 0.000 ] size [0.100 5.000 0.500])
 
 rectangle(
 pose [0 0 0 45]
-size [0.56 0.7 0.500]
+size [1.0 1.0 0.500]
+)
+
+rectangle(
+pose [0 0 0 45]
+size [1.0 1.0 0.500]
+)
+
+rectangle(
+pose [0 0 0 45]
+size [1.0 1.0 0.500]
 )

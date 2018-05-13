@@ -4,23 +4,20 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/LaserScan.h>
-#include <opencv_apps/LineArrayStamped.h>
 #include <opencv_apps/CircleArrayStamped.h>
 
-class LineDetector {
+class ScanToImageConverter {
 public:
 
     /**
      * Create a new LineDetector instance.
      */
-    LineDetector() {
+    ScanToImageConverter() {
         // Publish the scan information and  condensed lines to the image topic and line topic.
         image_pub = handle.advertise<sensor_msgs::Image>("/image", 1);
-        lines_pub = handle.advertise<opencv_apps::LineArrayStamped>("/object_detection/lines", 1);
 
         // Subscribe to the scan and line topics.
-        scan_sub = handle.subscribe("/object_detection/scan", 1, &LineDetector::laserScanCallback, this);
-        lines_sub = handle.subscribe("/hough_lines/lines", 1, &LineDetector::houghLinesCallback, this);
+        scan_sub = handle.subscribe("/scan", 1, &ScanToImageConverter::laserScanCallback, this);
         multiplier = 100;
     }
 
@@ -84,69 +81,20 @@ public:
         image_pub.publish(image);
     }
 
-    /**
-     * Cleans up the lines by kongregating similar lines/parallel lines into a single line segment. These are then
-     * fed to the /object_detection/lines topic to be handled by the object detector.
-     *
-     * @param lineData      The line data to tidy up.
-     */
-    void houghLinesCallback(const opencv_apps::LineArrayStampedConstPtr &lineData) {
-        // Lines that are next to each other need to be collated to find at least two sides of the object.
-        std::vector<opencv_apps::Line> lines;
-        opencv_apps::LineArrayStamped linesMsg;
-
-        // TODO: REWITE METHOD.
-        int d1x12x1Diff;
-        int d1y12y1Diff;
-        int d1x22x2Diff;
-        int d1y22y2Diff;
-        int thres = 10;
-
-        for (int i = 0; i < lineData->lines.size(); i++) {
-            bool bDifferent = true;
-            opencv_apps::Line line = lineData->lines[i];
-            for (int j = 0; j < lines.size(); j++) {
-                // The delta difference is currentLine_x/lines_x + currentLine_y/lines_y
-                // The closer this value is to 2, the closer these two points are to being equal to each other.
-                d1x12x1Diff = abs(int(line.pt1.x - lines[j].pt1.x));
-                d1y12y1Diff = abs(int(line.pt1.y - lines[j].pt1.y));
-                d1x22x2Diff = abs(int(line.pt2.x - lines[j].pt2.x));
-                d1y22y2Diff = abs(int(line.pt2.y - lines[j].pt2.y));
-
-                ROS_DEBUG("%d %d %d %d", d1x12x1Diff, d1y12y1Diff, d1x22x2Diff, d1y22y2Diff);
-
-                if (d1x12x1Diff < thres && d1y12y1Diff < thres && d1x22x2Diff < thres && d1y22y2Diff < thres) {
-                    // We have a new line that is the same as the current one.
-                    bDifferent = false;
-                }
-            }
-            if (bDifferent) {
-                lines.push_back(line);
-                linesMsg.lines.push_back(line);
-                ROS_DEBUG("Line found x1,y1: %.4f,%.4f x2,y2: %.4f,%.4f", line.pt1.x, line.pt1.y, line.pt2.x,
-                          line.pt2.y);
-            }
-        }
-
-        lines_pub.publish(linesMsg);
-    }
-
 private:
     ros::NodeHandle handle;
 
     ros::Publisher image_pub;
-    ros::Publisher lines_pub;
     ros::Subscriber scan_sub;
-    ros::Subscriber lines_sub;
 
     unsigned int multiplier;
 };
 
 int main(int argc, char **argv) {
     // Command line ROS arguments
-    ros::init(argc, argv, "line_detector");
+    ros::init(argc, argv, "scan_to_image_converter");
 
-    LineDetector lineDetector;
+    ScanToImageConverter lineDetector;
     ros::spin();
 
     return 0;

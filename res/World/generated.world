@@ -59,10 +59,10 @@ define myRobot position
 myRobot( pose [ 0.5 0 0.000 0.000 ] origin [ 0.000 0.000 0.000 0.000 ] name "bob" color "random")
 
 
-circle(
-  pose [0 0 0 0] 
-  size [0.3 0.3 0.500]
-)
+#circle(
+#  pose [0 0 0 0] 
+#  size [0.3 0.3 0.500]
+#)
 
 #rectangle(
 #  pose [0 0 0 45] 
@@ -74,4 +74,13 @@ border(color "red" pose [ 5 -3 0 0 ] size [10 0.1 0.5])
 border(color "red" pose [ 5 3 0 0 ]  size [10 0.1 0.5])
 border(color "red" pose [ 10 0 0 0 ] size [0.1 6 0.5])
 border(color "red" pose [ 0 0 0 0 ]  size [0.1 6 0.5])
-#circle(pose [5.92 -0.38 0 0] size [0.16 0.16 0.500])
+rectangle(pose [8.6 1.06 0 105] size [0.76 0.26 0.500])
+circle(pose [6.64 0.55 0 0] size [0.26 0.26 0.500])
+circle(pose [4.29 1.53 0 0] size [0.46 0.46 0.500])
+rectangle(pose [2.42 -0.94 0 60] size [1 0.22 0.500])
+rectangle(pose [7.32 -1.41 0 150] size [0.86 0.14 0.500])
+circle(pose [9.14 -1.57 0 0] size [0.48 0.48 0.500])
+rectangle(pose [1.89 1.39 0 123] size [0.78 0.3 0.500])
+circle(pose [1.68 -2.26 0 0] size [0.16 0.16 0.500])
+rectangle(pose [5.69 -2.36 0 61] size [0.46 0.22 0.500])
+rectangle(pose [4.5 0.31 0 111] size [0.38 0.24 0.500])

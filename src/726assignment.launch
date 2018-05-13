@@ -6,13 +6,48 @@
     <!--</node>-->
 
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/task1.world">-->
-    <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/generated.world">-->
-    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/barrel_no_border.world">
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/generated.world">
+    <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/barrel_no_border.world">-->
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/container_no_border.world">-->
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/barrel_border.world">-->
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/container_border.world">-->
         <remap from="base_scan" to="scanOrig" />
     </node>
+
+    <node pkg="custom_noise" type="custom_noise_node" name="custom_noise_node" output="screen" >
+        <remap from="/scan_noise" to="/dirty/scan"/>
+    </node>
+
+    <node pkg="cleanup" type="scan_cleaner" name="scan_cleaner">
+        <remap from="/clean/scan" to="/scan" />
+    </node>
+
+    <node pkg="object_detection" type="scan_to_image_converter" name="scan_to_image_converter" output="screen">
+        <remap from="/image" to="/image/bordered" />
+    </node>
+
+    <!-- START REMOVE BORDERS -->
+    <node pkg="opencv_apps" type="hough_lines" name="hough_lines_bordered">
+        <remap from="/image" to="/image/bordered" />
+        <param name="hough_type" value="1" />
+        <param name="debug_view" value="true" />
+        <param name="threshold" value="115" />
+        <param name="rho" value="5.0" />
+        <param name="theta" value="0.025" />
+        <param name="minLineLength" value="120.0" />
+        <param name="maxLineGap" value="40.0" />
+    </node>
+
+    <node pkg="cleanup" type="line_cleaner" name="line_cleaner_bordered">
+        <remap from="/dirty/lines" to="/hough_lines_bordered/lines" />
+        <remap from="/clean/lines" to="/line_cleaner_bordered/clean/lines" />
+    </node>
+
+    <node pkg="object_detection" type="remove_borders" name="remove_borders">
+        <remap from="/lines" to="/line_cleaner_bordered/clean/lines" />
+    </node>
+
+    <!-- FINISHED REMOVING BORDERS -->
 
     <node pkg="opencv_apps" type="hough_lines" name="hough_lines">
         <param name="hough_type" value="1" />
@@ -22,6 +57,11 @@
         <param name="theta" value="0.025" />
         <param name="minLineLength" value="10.0" />
         <param name="maxLineGap" value="10.0" />
+    </node>
+
+    <node pkg="cleanup" type="line_cleaner" name="line_cleaner">
+        <remap from="/dirty/lines" to="/hough_lines/lines" />
+        <remap from="/clean/lines" to="/lines" />
     </node>
 
     <node pkg="opencv_apps" type="hough_circles" name="hough_circles">
@@ -36,19 +76,11 @@
         <param name="max_circle_radius" value="50" />
     </node>
 
-    <node pkg="object_detection" type="clean_scan" name="clean_scan">
+    <node pkg="object_detection" type="detect_objects" name="detect_objects" output="screen">
+        <remap from="/circles" to="/hough_circles/circles" />
+        <remap from="/border" to="/object/border" />
     </node>
-
-    <node pkg="object_detection" type="line_detector" name="line_detector" output="screen">
-    </node>
-
-    <!--<node pkg="object_detection" type="detect_objects" name="detect_objects" output="screen">-->
-    <!--</node>-->
 
     <!--<node pkg="rqt_console" type="rqt_console" name="rqt_console">-->
     <!--</node>-->
-
-    <node pkg="custom_noise" type="custom_noise_node" name="custom_noise_node" output="screen" >
-        <remap from="scan_noise" to="scan"/>
-    </node>
 </launch>

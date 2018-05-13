@@ -12,10 +12,10 @@ public:
      */
     ScanCleaner() {
         // Publish the clean scan information to the /object_detection/scan topic
-        scan_pub = handle.advertise<sensor_msgs::LaserScan>("/object_detection/scan", 1);
+        scan_pub = handle.advertise<sensor_msgs::LaserScan>("/clean/scan", 1);
 
         // Subscribe to the scan topic.
-        scan_sub = handle.subscribe("/scan", 1, &ScanCleaner::laserScanCallback, this);
+        scan_sub = handle.subscribe("/dirty/scan", 1, &ScanCleaner::laserScanCallback, this);
 
         threshold = 0.1;
     }
@@ -34,7 +34,6 @@ public:
         cleanScanData.range_min = laserScanData->range_min;
         cleanScanData.range_max = laserScanData->range_max;
         cleanScanData.intensities = laserScanData->intensities;
-        cleanScanData.header = laserScanData->header;
 
         for (int j = 0; j < rangeDataNum; j++) {
             // If a scan point is all by itself, remove that point from the scan. i.e. set the range at 5.7.
@@ -63,7 +62,7 @@ private:
 
 int main(int argc, char **argv) {
     // Command line ROS arguments
-    ros::init(argc, argv, "clean_scan");
+    ros::init(argc, argv, "scan_cleaner");
 
     ScanCleaner scanCleaner;
     ros::spin();
