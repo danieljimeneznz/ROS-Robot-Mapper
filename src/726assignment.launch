@@ -29,6 +29,7 @@
     <!-- START REMOVE BORDERS -->
     <node pkg="opencv_apps" type="hough_lines" name="hough_lines_bordered">
         <remap from="/image" to="/image/bordered" />
+        <remap from="/hough_lines_bordered/lines" to="/lines" />
         <param name="hough_type" value="1" />
         <param name="debug_view" value="true" />
         <param name="threshold" value="115" />
@@ -43,38 +44,38 @@
         <remap from="/clean/lines" to="/lines" />
     </node>
 
-    <!--<node pkg="object_detection" type="remove_borders" name="remove_borders">-->
-        <!--<remap from="/lines" to="/line_cleaner_bordered/clean/lines" />-->
-    <!--</node>-->
+    <node pkg="object_detection" type="remove_borders" name="remove_borders">
+        <remap from="/lines" to="/line_cleaner_bordered/clean/lines" />
+    </node>
 
     <!-- FINISHED REMOVING BORDERS -->
 
-    <!--<node pkg="opencv_apps" type="hough_lines" name="hough_lines">-->
-        <!--<param name="hough_type" value="1" />-->
-        <!--<param name="debug_view" value="true" />-->
-        <!--<param name="threshold" value="115" />-->
-        <!--<param name="rho" value="5.0" />-->
-        <!--<param name="theta" value="0.025" />-->
-        <!--<param name="minLineLength" value="10.0" />-->
-        <!--<param name="maxLineGap" value="10.0" />-->
-    <!--</node>-->
+    <node pkg="opencv_apps" type="hough_lines" name="hough_lines">
+        <param name="hough_type" value="1" />
+        <param name="debug_view" value="true" />
+        <param name="threshold" value="115" />
+        <param name="rho" value="5.0" />
+        <param name="theta" value="0.025" />
+        <param name="minLineLength" value="10.0" />
+        <param name="maxLineGap" value="10.0" />
+    </node>
 
-    <!--<node pkg="cleanup" type="line_cleaner" name="line_cleaner">-->
-        <!--<remap from="/dirty/lines" to="/hough_lines/lines" />-->
-        <!--<remap from="/clean/lines" to="/lines" />-->
-    <!--</node>-->
+    <node pkg="cleanup" type="line_cleaner" name="line_cleaner">
+        <remap from="/dirty/lines" to="/hough_lines/lines" />
+        <remap from="/clean/lines" to="/lines" />
+    </node>
 
-    <!--<node pkg="opencv_apps" type="hough_circles" name="hough_circles">-->
-        <!--<param name="canny_threshold" value="200" />-->
-        <!--<param name="debug_view" value="true" />-->
-        <!--<param name="accumulator_threshold" value="55" />-->
-        <!--<param name="gaussian_blur_size" value="8" />-->
-        <!--<param name="gaussian_sigma_x" value="7.0" />-->
-        <!--<param name="gaussian_sigma_y" value="7.0" />-->
-        <!--<param name="dp" value="3" />-->
-        <!--<param name="min_circle_radius" value="10" />-->
-        <!--<param name="max_circle_radius" value="50" />-->
-    <!--</node>-->
+    <node pkg="opencv_apps" type="hough_circles" name="hough_circles">
+        <param name="canny_threshold" value="200" />
+        <param name="debug_view" value="true" />
+        <param name="accumulator_threshold" value="55" />
+        <param name="gaussian_blur_size" value="8" />
+        <param name="gaussian_sigma_x" value="7.0" />
+        <param name="gaussian_sigma_y" value="7.0" />
+        <param name="dp" value="3" />
+        <param name="min_circle_radius" value="10" />
+        <param name="max_circle_radius" value="50" />
+    </node>
 
     <!--<node pkg="object_detection" type="detect_objects" name="detect_objects" output="screen">-->
         <!--<remap from="/circles" to="/hough_circles/circles" />-->

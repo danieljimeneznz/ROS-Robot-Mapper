@@ -5,6 +5,8 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/LaserScan.h>
 #include <opencv_apps/CircleArrayStamped.h>
+#include <object_detection/object_detection.h>
+#include <cmath>
 
 class ScanToImageConverter {
 public:
@@ -18,7 +20,6 @@ public:
 
         // Subscribe to the scan and line topics.
         scan_sub = handle.subscribe("/scan", 1, &ScanToImageConverter::laserScanCallback, this);
-        multiplier = 100;
     }
 
     /**
@@ -34,8 +35,8 @@ public:
 
         int x = 0;
         int y = 0;
-        unsigned int width = 12 * multiplier;
-        unsigned int height = 6 * multiplier;
+        unsigned int width = (6 + ObjectDetection::xAxisOffset) * ObjectDetection::multiplier;
+        unsigned int height = 6 * ObjectDetection::multiplier;
 
         // Create image array and set content to zero.
         uint8_t img[height * width];
@@ -45,8 +46,8 @@ public:
             // Only take laser information that is less than 5m from us.
             if (laserScanData->ranges[j] < 5) {
                 // Uses x = r * cos(theta) + 6 (to center the x axis) * multiplier
-                x = int((laserScanData->ranges[j] * cos(j * laserScanData->angle_increment) + 6) * multiplier);
-                y = int(laserScanData->ranges[j] * sin(j * laserScanData->angle_increment) * multiplier);
+                x = int((laserScanData->ranges[j] * cosf(j * laserScanData->angle_increment) + ObjectDetection::xAxisOffset) * ObjectDetection::multiplier);
+                y = int(laserScanData->ranges[j] * sinf(j * laserScanData->angle_increment) * ObjectDetection::multiplier);
 
                 ROS_DEBUG("Inserting point at %d", width * y + x);
 
@@ -86,8 +87,6 @@ private:
 
     ros::Publisher image_pub;
     ros::Subscriber scan_sub;
-
-    unsigned int multiplier;
 };
 
 int main(int argc, char **argv) {

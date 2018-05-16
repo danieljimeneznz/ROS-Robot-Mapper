@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   opencv_apps
   roscpp
   std_msgs
+  cv_bridge
 )
 
 ## System dependencies are found with CMake's conventions

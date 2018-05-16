@@ -4,15 +4,18 @@
 
 #include <ros/ros.h>
 #include <opencv_apps/LineArrayStamped.h>
+#include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 #include <tf/LinearMath/Vector3.h>
+#include <object_detection/object_detection.h>
+#include <geometry_msgs/Vector3.h>
 
 class BorderRemover {
 public:
 
     BorderRemover() {
         image_pub = handle.advertise<sensor_msgs::Image>("/image", 1);
-        lines_pub = handle.advertise<opencv_apps::LineArrayStamped>("/object/border", 1);
+        border_pub = handle.advertise<geometry_msgs::Vector3>("/object/border", 1);
 
         // Subscribe to the lines topic.
         image_sub = handle.subscribe("/image/bordered", 1, &BorderRemover::ImageCallback, this);
@@ -20,56 +23,64 @@ public:
     }
 
     void houghLinesCallback(const opencv_apps::LineArrayStampedConstPtr &lineData) {
+        this->lines = *lineData;
+
+        tf::Vector3 borderCorner;
         // See if two lines meet at a point and are perpendicular to each other.
         for (int i = 0; i < lineData->lines.size(); i++) {
-            // Convert line points into vector.
-            tf::Vector3 line1[2];
-            line1[0] = tf::Vector3(lineData->lines[i].pt1.x, lineData->lines[i].pt1.y, 0);
-            line1[1] = tf::Vector3(lineData->lines[i].pt2.x, lineData->lines[i].pt2.y, 0);
-
             for (int j = 0; j < lineData->lines.size(); j++) {
-                if(i == j) {
-                    continue;
-                }
+                borderCorner = ObjectDetection::linesArePerpendicular(lineData->lines[i], lineData->lines[j]);
 
-                // Convert line points into vector.
-                tf::Vector3 line2[2];
-                line2[0] = tf::Vector3(lineData->lines[j].pt1.x, lineData->lines[j].pt1.y, 0);
-                line2[1] = tf::Vector3(lineData->lines[j].pt2.x, lineData->lines[j].pt2.y, 0);
-
-                // See if they are perpendicular.
-                tf::Vector3 line1pt = line1[0] - line1[1];
-                tf::Vector3 line2pt = line2[0] - line2[1];
-                double cross = fabs(tf::tfDot(line1pt, line2pt));
-
-                // They are both perpendicular
-                if (cross < 5.0) {
-                    for (int k = 0; k < 2; k++) {
-                        for (int l = 0; l < 2; l++) {
-                            double distance = fabs(tf::tfDistance(line1[k], line2[l]));
-                            // If distance is less than threshold then the two meet.
-                            if (distance < 5.0) {
-                                // We have two lines that are perpendicular and close to each other.
-                                ROS_DEBUG("FOUND A BORDER CORNER");
-                            }
-                        }
-                    }
+                if (borderCorner) {
+                    border_pub.publish(borderCorner);
                 }
             }
         }
-
-//        lines_pub.publish(line);
     }
 
     void ImageCallback(const sensor_msgs::ImageConstPtr &image) {
-//        sensor_msgs::Image unBorderedImage;
-//        unBorderedImage.width = image->width;
-//        unBorderedImage.step = image->step;
-//        unBorderedImage.is_bigendian = image->is_bigendian;
-//        unBorderedImage.height = image->height;
+        // Points along lines can be immediately removed from the image.
+        // The way this is done by computing the area between points on the image and then removing them if
+        // the area is above a certain threshold.
+
+//        cv_bridge::CvImageConstPtr cv_ptr;
 //
-//        unBorderedImage.data = image->data;
-//        unBorderedImage.encoding = image->encoding;
+//        try {
+//            cv_ptr = cv_bridge::toCvCopy(image, sensor_msgs::image_encodings::MONO8);
+//        } catch (cv_bridge::Exception& e) {
+//            ROS_ERROR("cv_bridge exception: %s", e.what());
+//            return;
+//        }
+//
+//        cv::Mat mat = cv_ptr->image;
+//
+//        for (int i = 0; i < lines.lines.size(); i++) {
+//            tf::Vector3 a = tf::Vector3(lines.lines[i].pt1.x, lines.lines[i].pt1.y, 0);
+//            tf::Vector3 b = tf::Vector3(lines.lines[i].pt2.x, lines.lines[i].pt2.y, 0);
+//            tf::Vector3 ab = a - b;
+//            tf::Vector3 ac;
+//            double area;
+//
+//            // Set line endpoints equal to zero.
+//            mat.at<int>(int(lines.lines[i].pt1.y), int(lines.lines[i].pt1.x)) = 0;
+//            mat.at<int>(int(lines.lines[i].pt2.y), int(lines.lines[i].pt2.x)) = 0;
+//
+//            for (int y = 0; y < mat.rows; y++) {
+//                for (int x = 0; x < mat.cols; x++) {
+//                    // Point at current position is white.
+//                    if (mat.at<int>(y, x) == 255) {
+//                        ac = a - tf::Vector3(y, x, 0);
+//                        area = 0.5 * tf::tfCross(ab, ac).length();
+//
+//                        if(area < 100000.0) {
+//                            mat.at<int>(y, x) = 0;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        image_pub.publish(cv_ptr->toImageMsg());
         image_pub.publish(image);
     }
 
@@ -77,11 +88,11 @@ private:
     ros::NodeHandle handle;
 
     ros::Publisher image_pub;
-    ros::Publisher lines_pub;
+    ros::Publisher border_pub;
     ros::Subscriber lines_sub;
     ros::Subscriber image_sub;
 
-    std::vector<opencv_apps::Line> borders;
+    opencv_apps::LineArrayStamped lines;
 };
 
 int main(int argc, char **argv) {
