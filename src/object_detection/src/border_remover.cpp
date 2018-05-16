@@ -23,19 +23,19 @@ public:
     }
 
     void houghLinesCallback(const opencv_apps::LineArrayStampedConstPtr &lineData) {
-        this->lines = *lineData;
-
-        tf::Vector3 borderCorner;
-        // See if two lines meet at a point and are perpendicular to each other.
-        for (int i = 0; i < lineData->lines.size(); i++) {
-            for (int j = 0; j < lineData->lines.size(); j++) {
-                borderCorner = ObjectDetection::linesArePerpendicular(lineData->lines[i], lineData->lines[j]);
-
-                if (borderCorner) {
-                    border_pub.publish(borderCorner);
-                }
-            }
-        }
+//        this->lines = *lineData;
+//
+//        tf::Vector3 borderCorner;
+//        // See if two lines meet at a point and are perpendicular to each other.
+//        for (int i = 0; i < lineData->lines.size(); i++) {
+//            for (int j = 0; j < lineData->lines.size(); j++) {
+//                borderCorner = object_detection::linesArePerpendicular(lineData->lines[i], lineData->lines[j]);
+//
+//                if (borderCorner) {
+//                    border_pub.publish(borderCorner);
+//                }
+//            }
+//        }
     }
 
     void ImageCallback(const sensor_msgs::ImageConstPtr &image) {

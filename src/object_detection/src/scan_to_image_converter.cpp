@@ -35,8 +35,8 @@ public:
 
         int x = 0;
         int y = 0;
-        unsigned int width = (6 + ObjectDetection::xAxisOffset) * ObjectDetection::multiplier;
-        unsigned int height = 6 * ObjectDetection::multiplier;
+        unsigned int width = (6 + object_detection::xAxisOffset) * object_detection::multiplier;
+        unsigned int height = 6 * object_detection::multiplier;
 
         // Create image array and set content to zero.
         uint8_t img[height * width];
@@ -46,8 +46,8 @@ public:
             // Only take laser information that is less than 5m from us.
             if (laserScanData->ranges[j] < 5) {
                 // Uses x = r * cos(theta) + 6 (to center the x axis) * multiplier
-                x = int((laserScanData->ranges[j] * cosf(j * laserScanData->angle_increment) + ObjectDetection::xAxisOffset) * ObjectDetection::multiplier);
-                y = int(laserScanData->ranges[j] * sinf(j * laserScanData->angle_increment) * ObjectDetection::multiplier);
+                x = int((laserScanData->ranges[j] * cosf(j * laserScanData->angle_increment) + object_detection::xAxisOffset) * object_detection::multiplier);
+                y = int(laserScanData->ranges[j] * sinf(j * laserScanData->angle_increment) * object_detection::multiplier);
 
                 ROS_DEBUG("Inserting point at %d", width * y + x);
 

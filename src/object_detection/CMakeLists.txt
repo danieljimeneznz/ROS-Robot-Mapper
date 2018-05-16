@@ -124,6 +124,8 @@ include_directories(
  ${catkin_INCLUDE_DIRS}
 )
 
+## Declare a C++ library
+
 add_executable(scan_to_image_converter src/scan_to_image_converter.cpp)
 target_link_libraries(scan_to_image_converter ${catkin_LIBRARIES})
 add_dependencies(scan_to_image_converter ${catkin_EXPORTED_TARGETS})
@@ -135,9 +137,6 @@ add_dependencies(remove_borders ${catkin_EXPORTED_TARGETS})
 add_executable(detect_objects src/detect_objects.cpp)
 target_link_libraries(detect_objects ${catkin_LIBRARIES})
 add_dependencies(detect_objects ${catkin_EXPORTED_TARGETS})
-
-## Declare a C++ library
-add_library(${PROJECT_NAME} src/object_detection.cpp )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -160,8 +159,8 @@ add_library(${PROJECT_NAME} src/object_detection.cpp )
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
+# target_link_libraries(
+#     object_detection
 # )
 
 #############

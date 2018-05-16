@@ -11,16 +11,16 @@
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/container_no_border.world">-->
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/barrel_border.world">-->
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/container_border.world">-->
-        <remap from="base_scan" to="scanOrig" />
+        <remap from="/base_scan" to="/scan" />
     </node>
 
-    <node pkg="custom_noise" type="custom_noise_node" name="custom_noise_node" output="screen" >
-        <remap from="/scan_noise" to="/dirty/scan"/>
-    </node>
+    <!--<node pkg="custom_noise" type="custom_noise_node" name="custom_noise_node" output="screen" >-->
+        <!--<remap from="/scan_noise" to="/dirty/scan"/>-->
+    <!--</node>-->
 
-    <node pkg="cleanup" type="scan_cleaner" name="scan_cleaner">
-        <remap from="/clean/scan" to="/scan" />
-    </node>
+    <!--<node pkg="cleanup" type="scan_cleaner" name="scan_cleaner">-->
+        <!--<remap from="/clean/scan" to="/scan" />-->
+    <!--</node>-->
 
     <node pkg="object_detection" type="scan_to_image_converter" name="scan_to_image_converter" output="screen">
         <remap from="/image" to="/image/bordered" />
@@ -77,11 +77,11 @@
         <param name="max_circle_radius" value="50" />
     </node>
 
-    <!--<node pkg="object_detection" type="detect_objects" name="detect_objects" output="screen">-->
-        <!--<remap from="/circles" to="/hough_circles/circles" />-->
-        <!--<remap from="/border" to="/object/border" />-->
-    <!--</node>-->
+    <node pkg="object_detection" type="detect_objects" name="detect_objects" output="screen">
+        <remap from="/circles" to="/hough_circles/circles" />
+        <remap from="/border" to="/object/border" />
+    </node>
 
-    <!--<node pkg="rqt_console" type="rqt_console" name="rqt_console">-->
-    <!--</node>-->
+    <node pkg="rqt_console" type="rqt_console" name="rqt_console">
+    </node>
 </launch>
