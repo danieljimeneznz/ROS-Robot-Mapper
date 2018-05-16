@@ -10,13 +10,14 @@
 class Object {
 public:
     std::string type;
-    double x;
-    double y;
+    tf::Vector3 centre;
 
-    Object() {
+    explicit Object(tf::Vector3 centre) {
         this->type = "";
-        this->x = 0.0;
-        this->y = 0.0;
+        // Need to reduce the centre to be the correct Vector (as current vectors are multiplied).
+        // Switch x and y as the robot moves in the x direction but we treat this as y in the image.
+        this->centre = tf::Vector3(centre.y() / ObjectDetection::multiplier,
+                centre.x() / ObjectDetection::multiplier - ObjectDetection::xAxisOffset, 0);
     }
 
     virtual double getRadius() {
@@ -34,7 +35,7 @@ public:
 
 class Barrel : public Object {
 public:
-    Barrel() {
+    explicit Barrel(tf::Vector3 centre) : Object(centre) {
         this->radius = 0.0;
         this->type = "Barrel";
     }
@@ -48,7 +49,7 @@ public:
 
 class Container : public Object {
 public:
-    Container() {
+    explicit Container(tf::Vector3 centre) : Object(centre) {
         this->width = 0.0;
         this->height = 0.0;
         this->type = "Container";
@@ -68,7 +69,7 @@ public:
 
 class ObjectDetector {
 public:
-    ObjectDetector() {
+    ObjectDetector() = default {
         // Subscribe to the line and circle topics.
         border_sub = handle.subscribe("/border", 1, &ObjectDetector::borderCallback, this);
         lines_sub = handle.subscribe("/lines", 1, &ObjectDetector::linesCallback, this);
@@ -91,19 +92,15 @@ public:
                 closestObjectPoint = ObjectDetection::linesArePerpendicular(lineData->lines[i], lineData->lines[j]);
 
                 if (closestObjectPoint) {
-                    Container *container = new Container();
                     tf::Vector3 sides[2];
                     ObjectDetection::getObjectSides(lineData->lines[i], lineData->lines[j], sides);
-                    tf::Vector3 center;
-                    center = ObjectDetection::averageVector(sides[0], sides[1]);
+                    Container *container = new Container(ObjectDetection::averageVector(sides[0], sides[1]));
 
-                    container->x = center.x() / ObjectDetection::multiplier - ObjectDetection::xAxisOffset;
-                    container->y = center.y() / ObjectDetection::multiplier;
+                    // Sides should be contained in an array inside the obj.
+                    container->width = tf::tfDistance(container->centre, sides[0]);
+                    container->height = tf::tfDistance(container->centre, sides[1]);
 
-                    container->width = tf::tfDistance(center, sides[0]) / ObjectDetection::multiplier;
-                    container->height = tf::tfDistance(center, sides[1]) / ObjectDetection::multiplier;
-
-                    referencePointsToGlobalFrame(&container->x, &container->y);
+                    referencePointsToGlobalFrame(container);
                     addObject(container);
                 }
             }
@@ -112,23 +109,16 @@ public:
 
     void circlesCallback(const opencv_apps::CircleArrayStampedConstPtr &circleData) {
         for (int i = 0; i < circleData->circles.size(); i++) {
-            Barrel *barrel = new Barrel();
-            barrel->x = circleData->circles[i].center.x / ObjectDetection::multiplier - ObjectDetection::xAxisOffset;
-            barrel->y = circleData->circles[i].center.y / ObjectDetection::multiplier;
+            Barrel *barrel = new Barrel(tf::Vector3(circleData->circles[i].center.x, circleData->circles[i].center.y, 0));
             barrel->radius = circleData->circles[i].radius / ObjectDetection::multiplier;
 
             // Get the centre co-ordinate referenced to the global frame.
-            referencePointsToGlobalFrame(&barrel->x, &barrel->y);
+            referencePointsToGlobalFrame(barrel);
             addObject(barrel);
         }
     }
 
-    void referencePointsToGlobalFrame(double *x, double *y) {
-        // Switch x and y as the robot moves in the x direction but we treat this as y in the image.
-        double temp = *x;
-        *x = *y;
-        *y = temp;
-
+    void referencePointsToGlobalFrame(Object* object) {
         // TODO: BELOW.
         // Transform from LaserLink to odom.
     }
@@ -140,81 +130,57 @@ public:
      * @param object    The object to insert into the object bin.
      */
     void addObject(Object *object) {
-        bool bInBin = false;
-        unsigned int counterIndex = 0;
-        // Place in the bin if not already in there.
-        for (unsigned int i = 0; i < objectBin.size(); i++) {
-            Object *obj = objectBin[i];
-
-            if (fabs(object->x - obj->x) < binThreshold && fabs(object->y - obj->y) < binThreshold &&
-                obj->type == object->type) {
-                bInBin = true;
-                counterIndex = i;
-                break;
+        // Ignore Walls and large/small containers/barrels.
+        if (object->type == "Container") {
+            if (object->getWidth() > 1.1 || object->getHeight() > 1.1 ||
+                object->getWidth() < 0.08 || object->getHeight() < 0.08) {
+                return;
+            }
+        } else if (object->type == "Barrel") {
+            if (object->getRadius() > 0.6 || object->getRadius() < 0.08) {
+                return;
             }
         }
 
-        // Add object to bin if it was not found.
-        if (!bInBin) {
-            if (object->type == "Barrel") {
-                ROS_DEBUG("Added object: %s to bin. (x, y, r): (%.4f, %.4f, %.4f)", object->type.c_str(), object->x,
-                          object->y, object->getRadius());
-            } else if (object->type == "Container") {
-                ROS_DEBUG("Added object: %s to bin. (x, y, w, h): (%.4f, %.4f, %.4f, %.4f)", object->type.c_str(),
-                          object->x, object->y, object->getWidth(), object->getHeight());
+        bool bObjectExists = false;
+        long replaceObjectIndex = -1;
+        for (unsigned int i = 0; i < objects.size(); i++) { // NOLINT
+            // Place in the bin if not already in there.
+            // Otherwise adjust measurements to become more accurate.
+            if (tf::tfDistance(object->centre, objects[i]->centre) < ObjectDetection::centreThreshold) {
+                // Containers overwrite Barrels.
+                if (objects[i]->type == "Barrel" && object->type == "Container") {
+                    replaceObjectIndex = i;
+                } else if (objects[i]->type != "Container" && object->type != "Barrel") {
+                    objects[i]->centre = ObjectDetection::averageVector(object->centre, objects[i]->centre);
+                    bObjectExists = true;
+                }
             }
-            objectBin.push_back(object);
-            objectBinCount.push_back(1);
-        } else {
-            // Don't want to fill the bin up too much if we already know the object.
-            if (objectBinCount[counterIndex] < threshold * 2) {
-                // Increment bin counter.
-                objectBinCount[counterIndex]++;
-            }
-            // delete the object to free memory.
-            delete object;
+        }
+
+        if (replaceObjectIndex > -1) {
+            objects.at(unsigned(replaceObjectIndex)) = object;
+        }
+
+        if (!bObjectExists) {
+            objects.push_back(object);
         }
     }
 
     void findObjects() {
         ROS_DEBUG("Looking for Objects.");
-        bool bNewObjectFound = true;
-        // Consolidate objects from the bin.
-        for (unsigned int i = 0; i < objectBinCount.size(); i++) {
-            for (unsigned int j = 0; j < objects.size(); j++) {
-                // We have found a valid object, add it to the object map if its not already in there.
-                if (objects[j]->x == objectBin[i]->x && objects[j]->y == objectBin[i]->y) {
-                    bNewObjectFound = false;
-                }
-            }
-
-            if (objectBinCount[i] >= threshold && bNewObjectFound) {
-                // Ignore Walls and large/small containers/barrels.
-                if (objectBin[i]->type == "Container") {
-                    if (objectBin[i]->getWidth() > 1.1 || objectBin[i]->getHeight() > 1.1 ||
-                        objectBin[i]->getWidth() < 0.08 || objectBin[i]->getHeight() < 0.08) {
-                        continue;
-                    }
-                } else if (objectBin[i]->type == "Barrel") {
-                    if (objectBin[i]->getRadius() > 0.6 || objectBin[i]->getRadius() < 0.08) {
-                        continue;
-                    }
-                }
-
-                objects.push_back(objectBin[i]);
-
-                // Display found object to console.
+        for (unsigned int i = 0; i < objects.size(); i++) {
+             // Display found object to console.
                 ROS_INFO("Object Found!! - ID: %d", (objects.size() - 1));
-                if (objectBin[i]->type == "Barrel") {
-                    ROS_INFO("Type: %s, Radius %.2fm, X: %.2f, Y: %.2f", objectBin[i]->type.c_str(),
-                             objectBin[i]->getRadius(), objectBin[i]->x, objectBin[i]->y);
-                } else if (objectBin[i]->type == "Container") {
-                    ROS_INFO("Type: %s, Width: %.2fm, Height %.2fm, X: %.2f, Y: %.2f", objectBin[i]->type.c_str(),
-                             objectBin[i]->getWidth(), objectBin[i]->getHeight(), objectBin[i]->x, objectBin[i]->y);
+                if (objects[i]->type == "Barrel") {
+                    ROS_INFO("Type: %s, Radius %.2fm, X: %.2f, Y: %.2f", objects[i]->type.c_str(),
+                             objects[i]->getRadius(), objects[i]->centre.x(), objects[i]->centre.y());
+                } else if (objects[i]->type == "Container") {
+                    ROS_INFO("Type: %s, Width: %.2fm, Height %.2fm, X: %.2f, Y: %.2f", objects[i]->type.c_str(),
+                             objects[i]->getWidth(), objects[i]->getHeight(), objects[i]->centre.x(), objects[i]->centre.y());
                 }
             }
         }
-    }
 
 private:
     ros::NodeHandle handle;
@@ -223,11 +189,7 @@ private:
     ros::Subscriber lines_sub;
     ros::Subscriber circle_sub;
 
-    // x and y coordinates relative to the global reference frame.
-    // Objects stored as vector i.e. index = Id, value = *Object}
-    std::vector<Object *> foundObjects;
-
-    // Object Bin represents all the possible objects that could exist in the world at that point (box or circle).
+    // Object represents all the possible objects that could exist in the world at that point (box or circle).
     std::vector<Object *> objects;
 };
 

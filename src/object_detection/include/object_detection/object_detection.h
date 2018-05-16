@@ -15,6 +15,7 @@ namespace ObjectDetection {
     // CONSTANTS
     static unsigned int multiplier = 100;
     static unsigned int xAxisOffset = 6;
+    static double centreThreshold = 5.0;
 
 
     /**
