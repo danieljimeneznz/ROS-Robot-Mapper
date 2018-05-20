@@ -1,17 +1,25 @@
 <launch>
     <param name="use_sim_time " value="true" />
 
-    <!--<node pkg="robot_driver" type="pioneer_laser_node" name="pioneer_laser_node" output="screen">-->
-        <!--<remap from="RosAria/cmd_vel" to="cmd_vel"/>-->
-    <!--</node>-->
-
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/task1.world">-->
-    <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/generated.world">-->
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/generated.world">
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/barrel_no_border.world">-->
-    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/container_no_border.world">
+    <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/container_no_border.world">-->
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/barrel_border.world">-->
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/container_border.world">-->
         <remap from="/base_scan" to="/scan" />
+    </node>
+
+    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
+        <param name="map_update_interval" value="0.5" />
+        <param name="linearUpdate" value="0.3" />
+        <param name="angularUpdate" value="0.1" />
+        <param name="scan" value="scan" />
+        <param name="delta" value="0.25" />
+        <param name="xmin" value="-2" />
+        <param name="ymin" value="-2" />
+        <param name="xmax" value="2" />
+        <param name="ymax" value="2" />
     </node>
 
     <!--<node pkg="custom_noise" type="custom_noise_node" name="custom_noise_node" output="screen" >-->
@@ -22,7 +30,7 @@
         <!--<remap from="/clean/scan" to="/scan" />-->
     <!--</node>-->
 
-    <node pkg="object_detection" type="scan_to_image_converter" name="scan_to_image_converter" output="screen">
+    <node pkg="object_detection" type="scan_to_image_converter" name="scan_to_image_converter">
         <remap from="/image" to="/image/bordered" />
     </node>
 
@@ -53,7 +61,7 @@
     <node pkg="opencv_apps" type="hough_lines" name="hough_lines">
         <!--<remap from="/hough_lines/lines" to="/lines" />-->
         <param name="hough_type" value="1" />
-        <param name="debug_view" value="true" />
+        <!--<param name="debug_view" value="true" />-->
         <param name="threshold" value="115" />
         <param name="rho" value="5.0" />
         <param name="theta" value="0.05" />
@@ -69,7 +77,7 @@
     <node pkg="opencv_apps" type="hough_circles" name="hough_circles">
         <!--<remap from="/hough_circles/circles" to="/circles" />-->
         <param name="canny_threshold" value="200" />
-        <param name="debug_view" value="true" />
+        <!--<param name="debug_view" value="true" />-->
         <param name="accumulator_threshold" value="55" />
         <param name="gaussian_blur_size" value="8" />
         <param name="gaussian_sigma_x" value="7.0" />
@@ -79,9 +87,13 @@
         <param name="max_circle_radius" value="50" />
     </node>
 
-    <node pkg="object_detection" type="detect_objects" name="detect_objects" output="screen">
+    <node pkg="object_detection" type="detect_objects" name="detect_objects"><!--output="screen">-->
         <remap from="/circles" to="/hough_circles/circles" />
         <remap from="/border" to="/object/border" />
+    </node>
+
+    <node pkg="robot_driver" type="pioneer_robot_node" name="pioneer_robot_node">
+        <remap from="RosAria/cmd_vel" to="cmd_vel"/>
     </node>
 
     <!--<node pkg="rqt_console" type="rqt_console" name="rqt_console">-->
