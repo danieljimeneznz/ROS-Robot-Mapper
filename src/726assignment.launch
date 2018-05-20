@@ -7,8 +7,8 @@
 
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/task1.world">-->
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/generated.world">-->
-    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/barrel_no_border.world">
-    <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/container_no_border.world">-->
+    <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/barrel_no_border.world">-->
+    <node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/container_no_border.world">
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/barrel_border.world">-->
     <!--<node pkg="stage_ros" type="stageros" name="stageros" args="$(find robot_driver)/world/container_border.world">-->
         <remap from="/base_scan" to="/scan" />
@@ -51,13 +51,13 @@
     <!-- FINISHED REMOVING BORDERS -->
 
     <node pkg="opencv_apps" type="hough_lines" name="hough_lines">
-        <remap from="/hough_lines/lines" to="/lines" />
+        <!--<remap from="/hough_lines/lines" to="/lines" />-->
         <param name="hough_type" value="1" />
         <param name="debug_view" value="true" />
         <param name="threshold" value="115" />
         <param name="rho" value="5.0" />
-        <param name="theta" value="0.025" />
-        <param name="minLineLength" value="10.0" />
+        <param name="theta" value="0.05" />
+        <param name="minLineLength" value="8.0" />
         <param name="maxLineGap" value="10.0" />
     </node>
 
@@ -67,7 +67,7 @@
     <!--</node>-->
 
     <node pkg="opencv_apps" type="hough_circles" name="hough_circles">
-        <remap from="/hough_circles/circles" to="/circles" />
+        <!--<remap from="/hough_circles/circles" to="/circles" />-->
         <param name="canny_threshold" value="200" />
         <param name="debug_view" value="true" />
         <param name="accumulator_threshold" value="55" />
@@ -79,10 +79,10 @@
         <param name="max_circle_radius" value="50" />
     </node>
 
-    <!--<node pkg="object_detection" type="detect_objects" name="detect_objects" output="screen">-->
-        <!--<remap from="/circles" to="/hough_circles/circles" />-->
-        <!--<remap from="/border" to="/object/border" />-->
-    <!--</node>-->
+    <node pkg="object_detection" type="detect_objects" name="detect_objects" output="screen">
+        <remap from="/circles" to="/hough_circles/circles" />
+        <remap from="/border" to="/object/border" />
+    </node>
 
     <!--<node pkg="rqt_console" type="rqt_console" name="rqt_console">-->
     <!--</node>-->

@@ -2,7 +2,10 @@
 #include <ros/console.h>
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/LaserScan.h>
-#include <nav_msgs/Odometry.h>
+
+// gmapping required header files.
+#include <nav_msgs/OccupancyGrid.h>
+#include <tf/transform_listener.h>
 
 geometry_msgs::Twist velocityCommand; 
 

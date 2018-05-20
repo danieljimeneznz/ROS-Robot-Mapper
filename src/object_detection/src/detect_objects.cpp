@@ -75,8 +75,6 @@ public:
         border_sub = handle.subscribe("/border", 1, &ObjectDetector::borderCallback, this);
         lines_sub = handle.subscribe("/lines", 1, &ObjectDetector::linesCallback, this);
         circle_sub = handle.subscribe("/circles", 1, &ObjectDetector::circlesCallback, this);
-
-        objectsCurrentSize = 0;
     }
 
     void borderCallback(const geometry_msgs::Vector3ConstPtr &border) {
@@ -197,7 +195,7 @@ public:
 
     void findObjects() {
         ROS_DEBUG("Looking for Objects.");
-        for (unsigned long i = objectsCurrentSize; i < objects.size(); i++) {
+        for (int i = 0; i < objects.size(); i++) {
             // Display found object to console.
             ROS_INFO("Object Found!! - ID: %d", (objects.size() - 1));
             if (objects[i]->type == "Barrel") {
@@ -208,7 +206,6 @@ public:
                          objects[i]->getWidth(), objects[i]->getHeight(), objects[i]->centre.x(), objects[i]->centre.y());
             }
         }
-        objectsCurrentSize = objects.size();
     }
 
 private:
@@ -222,8 +219,6 @@ private:
 
     // Object represents all the possible objects that could exist in the world at that point (box or circle).
     std::vector<Object *> objects;
-
-    unsigned long objectsCurrentSize;
 };
 
 int main(int argc, char **argv) {
