@@ -6,6 +6,7 @@
 #include <opencv_apps/CircleArrayStamped.h>
 #include <geometry_msgs/Vector3.h>
 #include <object_detection/object_detection.h>
+#include <tf/transform_listener.h>
 
 class Object {
 public:
@@ -122,8 +123,28 @@ public:
     }
 
     void referencePointsToGlobalFrame(Object* object) {
-        // TODO: BELOW.
         // Transform from LaserLink to odom.
+
+        // TODO: Check this method appears to be working correctly...
+
+        // Convert the current object
+        geometry_msgs::PointStamped laserPointMsg;
+        laserPointMsg.header.frame_id = "base_laser_link";
+        laserPointMsg.header.stamp = ros::Time();
+        laserPointMsg.point.x = object->centre.x();
+        laserPointMsg.point.y = object->centre.y();
+        laserPointMsg.point.z = object->centre.z();
+
+        try {
+            geometry_msgs::PointStamped odomPointMsg;
+            transformListener.transformPoint("odom", laserPointMsg, odomPointMsg);
+
+            object->centre.setX(odomPointMsg.point.x);
+            object->centre.setY(odomPointMsg.point.y);
+            object->centre.setZ(odomPointMsg.point.z);
+        } catch (tf::TransformException& ex) {
+            ROS_ERROR("Recieved an exception trying to transform a point from \"base_laser_link\" to \"odom\": %s", ex.what());
+        }
     }
 
     /**
@@ -197,6 +218,8 @@ private:
     ros::Subscriber lines_sub;
     ros::Subscriber circle_sub;
 
+    tf::TransformListener transformListener;
+
     // Object represents all the possible objects that could exist in the world at that point (box or circle).
     std::vector<Object *> objects;
 
@@ -209,8 +232,8 @@ int main(int argc, char **argv) {
 
     ObjectDetector objectDetector;
 
-    // Loop 10 Hz
-    ros::Rate loop_rate(10);
+    // Loop 1 Hz
+    ros::Rate loop_rate(1);
 
     while (ros::ok()) {
         ros::spinOnce();

@@ -7,6 +7,8 @@ project(robot_driver)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  tf
+  geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -96,11 +98,9 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-#add_library(freeSpace src/freeSpace.cpp)
-
-add_executable(pioneer_laser_node src/pioneerLaser.cpp)
-target_link_libraries(pioneer_laser_node ${catkin_LIBRARIES}) 
-add_dependencies(pioneer_laser_node ${catkin_EXPORTED_TARGETS})
+add_executable(pioneer_robot_node src/pioneerRobot.cpp)
+target_link_libraries(pioneer_robot_node ${catkin_LIBRARIES})
+add_dependencies(pioneer_robot_node ${catkin_EXPORTED_TARGETS})
 
 ## Declare a cpp library
 # add_library(robot_driver

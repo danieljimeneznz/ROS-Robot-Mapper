@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   opencv_apps
   roscpp
   std_msgs
+  tf
   geometry_msgs
 #  message_generation
 )
