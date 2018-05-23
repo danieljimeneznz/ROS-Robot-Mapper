@@ -38,7 +38,7 @@ void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr &laserScanData) {
         x = laserScanData->ranges[j] * cosf(float(M_PI_4) + j * laserScanData->angle_increment);
         y = laserScanData->ranges[j] * sinf(j * laserScanData->angle_increment);
 
-        yPara = -10.0f * (x - 0.3f) * (x + 0.3f);
+        yPara = -5.0f * (x - 0.3f) * (x + 0.3f);
         if (y < yPara) {
             bObjectInWay = true;
             break;
@@ -53,8 +53,8 @@ void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr &laserScanData) {
         // turn a random direction if the forward movement was previously zero then turn
         // the same direction that was previously turned.
         if (velocityCommand.linear.x == 0) {
-            // If we were previously turning left for at least 3 seconds.
-            if (bLeft && (ros::Time::now() - lastDirectionChange).toSec() > 3) {
+            // If we were previously turning left for at least 10 seconds.
+            if (bLeft && (ros::Time::now() - lastDirectionChange).toSec() > 10) {
                 // Continue turning left.
                 velocityCommand.linear.x = 0;
                 velocityCommand.angular.z = 0.2;
