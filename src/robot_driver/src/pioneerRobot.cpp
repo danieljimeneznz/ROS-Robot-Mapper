@@ -9,6 +9,8 @@
 #include "cmath"
 
 geometry_msgs::Twist velocityCommand;
+bool bLeft = true;
+ros::Time lastDirectionChange;
 /*
 The scan subscriber call back function
 To understand the sensor_msgs::LaserScan object look at
@@ -19,13 +21,10 @@ void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr &laserScanData) {
     // max angle and min angle of the laser scanner divide by the increment angle of each data point
     int rangeDataNum = 1 + int((laserScanData->angle_max - laserScanData->angle_min) / (laserScanData->angle_increment));
 
-    // Move forward
-    velocityCommand.linear.x = 0.1;
-    velocityCommand.angular.z = 0.0;
-
     float x;
     float y;
     float yPara;
+    bool bObjectInWay = false;
 
     // Go through the laser data
     for (int j = 0; j < rangeDataNum; j++) {
@@ -36,21 +35,41 @@ void laserScanCallback(const sensor_msgs::LaserScan::ConstPtr &laserScanData) {
         //    x           x
 
         // Get x and y co-ordinates of point.
-        x = laserScanData->ranges[j] * cosf(M_PI_4 + j * laserScanData->angle_increment);
+        x = laserScanData->ranges[j] * cosf(float(M_PI_4) + j * laserScanData->angle_increment);
         y = laserScanData->ranges[j] * sinf(j * laserScanData->angle_increment);
 
-        yPara = -5.0f * (x - 0.3f) * (x + 0.3f);
-        if (j == 260) {
-            ROS_INFO("HI");
-        }
-
+        yPara = -10.0f * (x - 0.3f) * (x + 0.3f);
         if (y < yPara) {
-            velocityCommand.linear.x = 0;   // stop forward movement
-            // turn a random direction if the forward movement was previously zero then turn
-            // the same direction that was previously turned.
-            velocityCommand.angular.z = 0.1;
+            bObjectInWay = true;
             break;
         }
+    }
+
+    if (!bObjectInWay) {
+        // Move forward
+        velocityCommand.linear.x = 0.2;
+        velocityCommand.angular.z = 0.0;
+    } else {
+        // turn a random direction if the forward movement was previously zero then turn
+        // the same direction that was previously turned.
+        if (velocityCommand.linear.x == 0) {
+            // If we were previously turning left for at least 3 seconds.
+            if (bLeft && (ros::Time::now() - lastDirectionChange).toSec() > 3) {
+                // Continue turning left.
+                velocityCommand.linear.x = 0;
+                velocityCommand.angular.z = 0.2;
+            } else {
+                // Continue turning right.
+                velocityCommand.linear.x = 0;
+                velocityCommand.angular.z = -0.2;
+            }
+        } else {
+            // Entropy to turn either left or right.
+            velocityCommand.linear.x = 0;
+            bLeft = rand() % 10 > 5;
+            lastDirectionChange = ros::Time::now();
+        }
+
     }
 }
 
