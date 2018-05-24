@@ -71,14 +71,22 @@ public:
 class ObjectDetector {
 public:
     ObjectDetector() {
-        // Subscribe to the line and circle topics.
+        // Subscribe to the border, line and circle topics.
         border_sub = handle.subscribe("/border", 1, &ObjectDetector::borderCallback, this);
         lines_sub = handle.subscribe("/lines", 1, &ObjectDetector::linesCallback, this);
         circle_sub = handle.subscribe("/circles", 1, &ObjectDetector::circlesCallback, this);
     }
 
-    void borderCallback(const geometry_msgs::Vector3ConstPtr &border) {
+    void borderCallback(const geometry_msgs::Vector3ConstPtr &borderData) {
+        // Convert vector to global frame by using an object.
+        tf::Vector3 borderCentre = tf::Vector3(borderData->x, borderData->y, 0.0);
+        Object border = Object(borderCentre);
+        referencePointsToGlobalFrame(&border);
 
+        // See if the current border exists in the border array.
+
+
+        // If all four borders found, exclaim that the map might be complete.
     }
 
     void linesCallback(const opencv_apps::LineArrayStampedConstPtr &lineData) {
@@ -122,8 +130,7 @@ public:
 
     void referencePointsToGlobalFrame(Object* object) {
         // Transform from LaserLink to odom.
-
-        // TODO: Check this method appears to be working correctly...
+        // TODO: Check this method! Appears to be working correctly...
 
         // Convert the current object
         geometry_msgs::PointStamped laserPointMsg;
