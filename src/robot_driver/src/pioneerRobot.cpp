@@ -133,7 +133,7 @@ void mapCallback(const nav_msgs::OccupancyGrid::ConstPtr &msg) {
         }
     }
     //print output
-    printf("%s\n", output.c_str());
+    ROS_DEBUG("%s\n", output.c_str());
 
     //other things about the map that you can print
     /*

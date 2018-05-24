@@ -10,7 +10,7 @@
         <remap from="/base_scan" to="/scan" />
     </node>
 
-    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
+    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="log">
         <param name="map_update_interval" value="0.5" />
         <param name="linearUpdate" value="0.3" />
         <param name="angularUpdate" value="0.1" />
@@ -87,7 +87,7 @@
         <param name="max_circle_radius" value="50" />
     </node>
 
-    <node pkg="object_detection" type="detect_objects" name="detect_objects"><!--output="screen">-->
+    <node pkg="object_detection" type="detect_objects" name="detect_objects" output="screen">
         <remap from="/circles" to="/hough_circles/circles" />
         <remap from="/border" to="/object/border" />
     </node>
@@ -98,4 +98,7 @@
 
     <!--<node pkg="rqt_console" type="rqt_console" name="rqt_console">-->
     <!--</node>-->
+
+    <node pkg="rviz" type="rviz" name="rviz">
+    </node>
 </launch>

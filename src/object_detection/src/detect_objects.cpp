@@ -83,10 +83,22 @@ public:
         Object border = Object(borderCentre);
         referencePointsToGlobalFrame(&border);
 
+        bool bCornerExists = true;
         // See if the current border exists in the border array.
+        for (int i = 0; i < borderCorners.size(); i++) { //NOLINT
+            if (tf::tfDistance(borderCorners[i], border.centre) < object_detection::centreThreshold) {
+                bCornerExists = false;
+            }
+        }
 
+        if (!bCornerExists) {
+            borderCorners.push_back(border.centre);
+        }
 
         // If all four borders found, exclaim that the map might be complete.
+        if (borderCorners.size() == 4) {
+            ROS_INFO("All four corners have been found. Mapping possibly complete.");
+        }
     }
 
     void linesCallback(const opencv_apps::LineArrayStampedConstPtr &lineData) {
@@ -175,24 +187,15 @@ public:
         long replaceObjectIndex = -1;
         for (unsigned int i = 0; i < objects.size(); i++) { // NOLINT
             // Place in the bin if not already in there.
-            if (object->centre == objects[i]->centre) {
+            if (object->centre == objects[i]->centre && objects[i]->type != object->type) {
                 continue;
             }
 
             // Otherwise adjust measurements to become more accurate.
             if (tf::tfDistance(object->centre, objects[i]->centre) < object_detection::centreThreshold) {
-                // Containers overwrite Barrels.
-                if (objects[i]->type == "Barrel" && object->type == "Container") {
-                    replaceObjectIndex = i;
-                } else if (objects[i]->type != "Container" && object->type != "Barrel") {
                     objects[i]->centre = object_detection::averageVector(object->centre, objects[i]->centre);
                     bObjectExists = true;
-                }
             }
-        }
-
-        if (replaceObjectIndex > -1) {
-            objects.at(unsigned(replaceObjectIndex)) = object;
         }
 
         if (!bObjectExists) {
@@ -202,7 +205,7 @@ public:
 
     void findObjects() {
         ROS_DEBUG("Looking for Objects.");
-        for (int i = 0; i < objects.size(); i++) {
+        for (int i = 0; i < objects.size(); i++) { //NOLINT
             // Display found object to console.
             ROS_INFO("Object Found!! - ID: %d", (objects.size() - 1));
             if (objects[i]->type == "Barrel") {
@@ -226,6 +229,9 @@ private:
 
     // Object represents all the possible objects that could exist in the world at that point (box or circle).
     std::vector<Object *> objects;
+
+    // Store the current border co-ordinates as the corners.
+    std::vector<tf::Vector3> borderCorners;
 };
 
 int main(int argc, char **argv) {
@@ -241,7 +247,7 @@ int main(int argc, char **argv) {
         ros::spinOnce();
         loop_rate.sleep();
 
-        objectDetector.findObjects();
+        //objectDetector.findObjects();
     }
 
     return 0;
