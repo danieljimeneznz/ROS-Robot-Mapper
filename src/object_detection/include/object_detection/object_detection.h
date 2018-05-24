@@ -16,7 +16,7 @@ namespace object_detection {
     // CONSTANTS
     static unsigned int multiplier = 100;
     static unsigned int xAxisOffset = 6;
-    static double centreThreshold = 20.0;
+    static double centreThreshold = 100.0;
 
 
     tf::Vector3 averageVector(const tf::Vector3 a, const tf::Vector3 b) {
