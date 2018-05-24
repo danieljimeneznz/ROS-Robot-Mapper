@@ -52,9 +52,9 @@
         <!--<remap from="/clean/lines" to="/lines" />-->
     <!--</node>-->
 
-    <node pkg="object_detection" type="remove_borders" name="remove_borders">
-        <remap from="/lines" to="/hough_lines_bordered/lines" />
-    </node>
+    <!--<node pkg="object_detection" type="remove_borders" name="remove_borders">-->
+        <!--<remap from="/lines" to="/hough_lines_bordered/lines" />-->
+    <!--</node>-->
 
     <!-- FINISHED REMOVING BORDERS -->
 

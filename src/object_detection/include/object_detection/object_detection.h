@@ -57,7 +57,7 @@ namespace object_detection {
                 }
             }
         }
-        return tf::Vector3();
+        return tf::Vector3(0.0, 0.0, 0.0);
     }
 
     /**
