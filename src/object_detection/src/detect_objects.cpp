@@ -78,8 +78,6 @@ public:
     }
 
     void borderCallback(const geometry_msgs::Vector3ConstPtr &borderData) {
-        // Returning to not chew through too much memory.
-        return;
         // Convert vector to global frame by using an object.
         tf::Vector3 borderCentre = tf::Vector3(borderData->x, borderData->y, 0.0);
         Object border = Object(borderCentre);
@@ -173,8 +171,6 @@ public:
      * @param object    The object to insert into the object bin.
      */
     void addObject(Object *object) {
-        // Returning here for now since ths will allocate too much memory when adding objects to the bin.
-        return;
         // Ignore Walls and large/small containers/barrels.
         if (object->type == "Container") {
             if (object->getWidth() > 1.1 || object->getHeight() > 1.1 ||
@@ -251,7 +247,7 @@ int main(int argc, char **argv) {
         ros::spinOnce();
         loop_rate.sleep();
 
-        //objectDetector.findObjects();
+        objectDetector.findObjects();
     }
 
     return 0;
