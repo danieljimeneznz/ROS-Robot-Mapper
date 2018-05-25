@@ -1,5 +1,6 @@
 # milliseconds per update step
 interval_sim 50
+resolution 0.001
 
 window
 (
@@ -74,13 +75,8 @@ border(color "red" pose [ 5 -3 0 0 ] size [10 0.1 0.5])
 border(color "red" pose [ 5 3 0 0 ]  size [10 0.1 0.5])
 border(color "red" pose [ 10 0 0 0 ] size [0.1 6 0.5])
 border(color "red" pose [ 0 0 0 0 ]  size [0.1 6 0.5])
-rectangle(pose [8.6 1.06 0 105] size [0.76 0.26 0.500])
-circle(pose [6.64 0.55 0 0] size [0.26 0.26 0.500])
-circle(pose [4.29 1.53 0 0] size [0.46 0.46 0.500])
-rectangle(pose [2.42 -0.94 0 60] size [1 0.22 0.500])
-rectangle(pose [7.32 -1.41 0 150] size [0.86 0.14 0.500])
-circle(pose [9.14 -1.57 0 0] size [0.48 0.48 0.500])
-rectangle(pose [1.89 1.39 0 123] size [0.78 0.3 0.500])
-circle(pose [1.68 -2.26 0 0] size [0.16 0.16 0.500])
-rectangle(pose [5.69 -2.36 0 61] size [0.46 0.22 0.500])
-rectangle(pose [4.5 0.31 0 111] size [0.38 0.24 0.500])
+rectangle(pose [7.41 -2.15 0 158] size [0.68 0.5 0.500])
+rectangle(pose [5.85 1.1 0 38] size [0.42 0.5 0.500])
+circle(pose [7.92 1.49 0 0] size [0.76 0.76 0.500])
+rectangle(pose [4.67 -0.3 0 145] size [0.3 0.8 0.500])
+circle(pose [2.39 -1.9 0 0] size [0.64 0.64 0.500])

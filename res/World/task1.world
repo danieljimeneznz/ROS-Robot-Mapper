@@ -1,5 +1,6 @@
 # milliseconds per update step
 interval_sim 50
+resolution 0.001
 
 window
 (
@@ -67,7 +68,7 @@ myRobot( pose [ 0.000 -1.5 0.000 90.000 ] origin [ 0.000 0.000 0.000 90.000 ] na
 
 #circle(
 #  pose [0 0 0 0] 
-#  size [0.3 0.3 0.500]
+#  size [0.32 0.32 0.500]
 #)
 
 rectangle(

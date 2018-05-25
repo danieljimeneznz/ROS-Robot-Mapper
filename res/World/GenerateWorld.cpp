@@ -157,21 +157,21 @@ int main (int argc, char *argv[]) {
 					x = (int)(1001*(rand()/(RAND_MAX + 1.0)));
 					//y can be from -3 to 3 meters
 					y = (int)(601*(rand()/(RAND_MAX + 1.0)))-300;
-					vaild = isVaild(x, y, r, i, itemX,itemY,itemR);
+					vaild = isVaild(x, y, r*2, i, itemX,itemY,itemR); //use diameter to test
 
 					tries++;
 				}
 
-				float xf,yf,rf; //floating point numbers in meters
+				float xf,yf,rf,df; //floating point numbers in meters
 				xf = (float)x/100.0;
 				yf = (float)y/100.0;
 				rf = (float)r/100.0;
-
+				df = rf*2;
 
 				cout<<"Radius:"<<rf;
 				cout<<" X:"<<xf;
-				cout<<" Y:"<<yf<<endl;;	
-				newWorldFile<<"circle(pose ["<<xf<<" "<<yf<<" 0 0] size ["<<rf<<" "<<rf<<" 0.500])"<<endl;
+				cout<<" Y:"<<yf<<endl;;
+				newWorldFile<<"circle(pose ["<<xf<<" "<<yf<<" 0 0] size ["<<df<<" "<<df<<" 0.500])"<<endl;
 			}else{
 				cout<<i<<":Genearted container"<<endl;
 				int x,y,w,l; //x,y width and length in cm
